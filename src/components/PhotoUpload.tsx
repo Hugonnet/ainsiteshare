@@ -91,11 +91,6 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
         <p className="text-muted-foreground mb-4">
           ou
         </p>
-        <label htmlFor="file-upload">
-          <Button className="cursor-pointer">
-            Sélectionner des fichiers
-          </Button>
-        </label>
         <input
           id="file-upload"
           type="file"
@@ -104,6 +99,12 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
           accept="image/*"
           onChange={handleFileChange}
         />
+        <Button 
+          onClick={() => document.getElementById('file-upload')?.click()}
+          type="button"
+        >
+          Sélectionner des fichiers
+        </Button>
         <p className="text-sm text-muted-foreground mt-4">
           Maximum 10 photos au format PNG, JPG ou WEBP
         </p>
