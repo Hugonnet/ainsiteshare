@@ -1,33 +1,35 @@
+import { lazy, Suspense } from "react";
 import { Header } from "@/components/Header";
-import { ProjectForm } from "@/components/ProjectForm";
-import { Fireworks } from "@/components/Fireworks";
-import { SuccessMessage } from "@/components/SuccessMessage";
-import { motion } from "framer-motion";
+
+const ProjectForm = lazy(() => import("@/components/ProjectForm"));
+const Fireworks = lazy(() => import("@/components/Fireworks"));
+const SuccessMessage = lazy(() => import("@/components/SuccessMessage"));
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container pt-24 pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-4">
             Partagez vos réalisations
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
             Téléchargez et partagez facilement les photos de vos chantiers
           </p>
-        </motion.div>
+        </div>
         
-        <ProjectForm />
-        
-        {/* Uncomment when upload is successful */}
-        {/* <Fireworks />
-        <SuccessMessage company="Entreprise" city="Paris" /> */}
+        <Suspense fallback={
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
+          </div>
+        }>
+          <ProjectForm />
+          
+          {/* Uncomment when upload is successful */}
+          {/* <Fireworks />
+          <SuccessMessage company="Entreprise" city="Paris" /> */}
+        </Suspense>
       </main>
     </div>
   );
