@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Upload, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
+import { PhotoPreview } from "./PhotoPreview";
 
 interface PhotoUploadProps {
   onPhotosChange: (files: File[]) => void;
@@ -12,11 +13,11 @@ interface PhotoUploadProps {
 export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [previewIndex, setPreviewIndex] = useState<number>(-1);
 
   const updatePreviews = (files: File[]) => {
     const newPreviews = files.map(file => URL.createObjectURL(file));
     setPreviews(prev => {
-      // Cleanup old preview URLs
       prev.forEach(url => URL.revokeObjectURL(url));
       return newPreviews;
     });
@@ -77,18 +78,18 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
       className="w-full max-w-xl mx-auto space-y-4"
     >
       <div
-        className={`glass rounded-lg p-8 text-center ${
+        className={`glass rounded-lg p-4 sm:p-8 text-center ${
           isDragging ? "border-primary" : ""
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-        <h3 className="text-xl font-semibold mb-2">
+        <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-4 text-muted-foreground" />
+        <h3 className="text-lg sm:text-xl font-semibold mb-2">
           Déposez vos photos ici
         </h3>
-        <p className="text-muted-foreground mb-4">
+        <p className="text-sm sm:text-base text-muted-foreground mb-4">
           ou
         </p>
         <input
@@ -98,26 +99,43 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
           multiple
           accept="image/*"
           onChange={handleFileChange}
+          capture="environment"
         />
-        <Button 
-          onClick={() => document.getElementById('file-upload')?.click()}
-          type="button"
-        >
-          Sélectionner des fichiers
-        </Button>
-        <p className="text-sm text-muted-foreground mt-4">
+        <div className="flex flex-col sm:flex-row gap-2 justify-center">
+          <Button 
+            onClick={() => document.getElementById('file-upload')?.click()}
+            type="button"
+            className="w-full sm:w-auto"
+          >
+            Sélectionner des fichiers
+          </Button>
+          <Button
+            onClick={() => {
+              const input = document.getElementById('file-upload') as HTMLInputElement;
+              input.setAttribute('capture', 'environment');
+              input.click();
+            }}
+            type="button"
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            Prendre une photo
+          </Button>
+        </div>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-4">
           Maximum 10 photos au format PNG, JPG ou WEBP
         </p>
       </div>
 
       {selectedFiles.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
           {previews.map((preview, index) => (
             <div key={preview} className="relative aspect-square">
               <img
                 src={preview}
                 alt={`Aperçu ${index + 1}`}
-                className="w-full h-full object-cover rounded-lg"
+                className="w-full h-full object-cover rounded-lg cursor-pointer"
+                onClick={() => setPreviewIndex(index)}
               />
               <button
                 onClick={() => removeFile(index)}
@@ -128,6 +146,16 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             </div>
           ))}
         </div>
+      )}
+
+      {previewIndex !== -1 && (
+        <PhotoPreview
+          photos={previews}
+          currentIndex={previewIndex}
+          onClose={() => setPreviewIndex(-1)}
+          onNext={() => setPreviewIndex(prev => Math.min(prev + 1, previews.length - 1))}
+          onPrevious={() => setPreviewIndex(prev => Math.max(prev - 1, 0))}
+        />
       )}
     </motion.div>
   );

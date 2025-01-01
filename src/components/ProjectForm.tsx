@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, getPhotoUrl } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { ProjectFormFields, formSchema } from "./ProjectFormFields";
 import type { z } from "zod";
@@ -55,13 +55,15 @@ export function ProjectForm() {
 
       if (insertError) throw insertError;
 
+      const photoUrls = photoPaths.map(getPhotoUrl);
+      
       const { error: emailError } = await supabase.functions.invoke('send-project-email', {
         body: {
           companyName: values.companyName,
           city: values.city,
           department: values.department,
           description: values.description,
-          photoPaths,
+          photoUrls,
         },
       });
 
@@ -88,7 +90,11 @@ export function ProjectForm() {
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
         />
-        <Button type="submit" disabled={isUploading} className="text-lg px-8 py-6">
+        <Button 
+          type="submit" 
+          disabled={isUploading} 
+          className="w-full sm:w-auto text-lg px-8 py-6"
+        >
           {isUploading ? "Envoi en cours..." : "Soumettre le projet"}
         </Button>
       </form>
