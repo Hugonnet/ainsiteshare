@@ -13,7 +13,8 @@ export default defineConfig(({ mode }) => ({
         "https://gptengineer.app",
         "https://lovable.dev",
         "https://ainsite-snapshot-sphere.lovable.app",
-        "http://localhost:3000"
+        "http://localhost:3000",
+        "https://ainsite-snapshot-sphere-private.lovable.app"
       ],
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true
