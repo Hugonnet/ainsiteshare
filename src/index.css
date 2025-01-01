@@ -40,6 +40,7 @@ html,
 body,
 #root {
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
   background-color: black;
@@ -50,6 +51,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: white;
+  overflow-x: hidden;
 }
 
 .glass {
@@ -75,7 +77,6 @@ body {
   color: #ea384c;
 }
 
-/* Ajout des styles pour les boutons dégradés */
 .gradient-button {
   background: linear-gradient(to right, #1EAEDB, #8B5CF6, #ea384c);
   color: white;

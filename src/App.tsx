@@ -6,23 +6,30 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 const Index = lazy(() => import("@/pages/Index"));
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Suspense fallback={
-        <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="min-h-screen bg-black flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
         </div>
       }>
-        <Toaster />
-        <Sonner />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
           </Routes>
         </BrowserRouter>
+        <Toaster />
+        <Sonner />
       </Suspense>
     </TooltipProvider>
   </QueryClientProvider>
