@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const Fireworks = () => {
+export const Fireworks = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -96,5 +96,3 @@ const Fireworks = () => {
     />
   );
 };
-
-export default Fireworks;

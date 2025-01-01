@@ -6,10 +6,10 @@ import { toast } from "sonner";
 import { supabase, getPhotoUrl } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { ProjectFormFields, formSchema } from "./ProjectFormFields";
-import Fireworks from "./Fireworks";
+import { Fireworks } from "./Fireworks";
 import type { z } from "zod";
 
-export function ProjectForm() {
+export const ProjectForm = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showFireworks, setShowFireworks] = useState(false);
@@ -108,6 +108,6 @@ export function ProjectForm() {
       </Form>
     </>
   );
-}
+};
 
 export default ProjectForm;
