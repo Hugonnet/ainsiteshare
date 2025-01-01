@@ -1,7 +1,5 @@
-import { lazy, Suspense } from "react";
 import { Header } from "@/components/Header";
-
-const ProjectForm = lazy(() => import("@/components/ProjectForm"));
+import ProjectForm from "@/components/ProjectForm";
 
 const Index = () => {
   return (
@@ -16,14 +14,7 @@ const Index = () => {
             Téléchargez et partagez facilement les photos de vos chantiers
           </p>
         </div>
-        
-        <Suspense fallback={
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
-          </div>
-        }>
-          <ProjectForm />
-        </Suspense>
+        <ProjectForm />
       </main>
     </div>
   );
