@@ -1,9 +1,9 @@
 import { lazy, Suspense } from "react";
 import { Header } from "@/components/Header";
 
-const ProjectForm = lazy(() => import("@/components/ProjectForm").then(module => ({ default: module.ProjectForm })));
-const Fireworks = lazy(() => import("@/components/Fireworks").then(module => ({ default: module.Fireworks })));
-const SuccessMessage = lazy(() => import("@/components/SuccessMessage").then(module => ({ default: module.SuccessMessage })));
+const ProjectForm = lazy(() => import("@/components/ProjectForm"));
+const Fireworks = lazy(() => import("@/components/Fireworks"));
+const SuccessMessage = lazy(() => import("@/components/SuccessMessage"));
 
 const Index = () => {
   return (
@@ -25,10 +25,6 @@ const Index = () => {
           </div>
         }>
           <ProjectForm />
-          
-          {/* Uncomment when upload is successful */}
-          {/* <Fireworks />
-          <SuccessMessage company="Entreprise" city="Paris" /> */}
         </Suspense>
       </main>
     </div>
