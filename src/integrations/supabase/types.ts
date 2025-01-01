@@ -24,6 +24,33 @@ export type Database = {
         }
         Relationships: []
       }
+      project_submissions: {
+        Row: {
+          city: string
+          company_name: string
+          created_at: string
+          description: string
+          id: number
+          photo_paths: string[] | null
+        }
+        Insert: {
+          city: string
+          company_name: string
+          created_at?: string
+          description: string
+          id?: number
+          photo_paths?: string[] | null
+        }
+        Update: {
+          city?: string
+          company_name?: string
+          created_at?: string
+          description?: string
+          id?: number
+          photo_paths?: string[] | null
+        }
+        Relationships: []
+      }
       seo_analyses: {
         Row: {
           created_at: string | null

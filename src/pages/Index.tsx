@@ -1,5 +1,5 @@
 import { Header } from "@/components/Header";
-import { PhotoUpload } from "@/components/PhotoUpload";
+import { ProjectForm } from "@/components/ProjectForm";
 import { Fireworks } from "@/components/Fireworks";
 import { SuccessMessage } from "@/components/SuccessMessage";
 import { motion } from "framer-motion";
@@ -23,7 +23,7 @@ const Index = () => {
           </p>
         </motion.div>
         
-        <PhotoUpload />
+        <ProjectForm />
         
         {/* Uncomment when upload is successful */}
         {/* <Fireworks />
