@@ -29,6 +29,7 @@ export type Database = {
           city: string
           company_name: string
           created_at: string
+          department: string | null
           description: string
           id: number
           photo_paths: string[] | null
@@ -37,6 +38,7 @@ export type Database = {
           city: string
           company_name: string
           created_at?: string
+          department?: string | null
           description: string
           id?: number
           photo_paths?: string[] | null
@@ -45,6 +47,7 @@ export type Database = {
           city?: string
           company_name?: string
           created_at?: string
+          department?: string | null
           description?: string
           id?: number
           photo_paths?: string[] | null
