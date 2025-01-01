@@ -96,3 +96,5 @@ export const Fireworks = () => {
     />
   );
 };
+
+export default Fireworks;

@@ -36,3 +36,5 @@ export const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
     </motion.div>
   );
 };
+
+export default SuccessMessage;
