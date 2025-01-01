@@ -92,7 +92,7 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
           ou
         </p>
         <label htmlFor="file-upload">
-          <Button as="span">
+          <Button className="cursor-pointer">
             Sélectionner des fichiers
           </Button>
         </label>
