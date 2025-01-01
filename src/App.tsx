@@ -11,28 +11,31 @@ const queryClient = new QueryClient({
     queries: {
       retry: false,
       refetchOnWindowFocus: false,
+      staleTime: Infinity,
     },
   },
 });
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Suspense fallback={
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
-        </div>
-      }>
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-          </Routes>
+          <Suspense fallback={
+            <div className="fixed inset-0 bg-black flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white"></div>
+            </div>
+          }>
+            <Routes>
+              <Route path="/" element={<Index />} />
+            </Routes>
+          </Suspense>
+          <Toaster />
+          <Sonner />
         </BrowserRouter>
-        <Toaster />
-        <Sonner />
-      </Suspense>
-    </TooltipProvider>
-  </QueryClientProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </StrictMode>
 );
 
 export default App;
