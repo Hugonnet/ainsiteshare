@@ -34,6 +34,8 @@ interface ProjectFormFieldsProps {
 }
 
 export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: ProjectFormFieldsProps) => {
+  const MAPBOX_TOKEN = "pk.eyJ1IjoiZXRpaHVnbyIsImEiOiJjbTVlOXJ4MXQwdGhmMmxzNWZvcjBhOWY5In0.QJMNqw9qgYNLs8IQBx8ESA";
+
   const getLocation = async () => {
     if (!navigator.geolocation) {
       toast.error("La géolocalisation n'est pas supportée par votre navigateur");
@@ -46,7 +48,7 @@ export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: Pro
       });
 
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${position.coords.longitude},${position.coords.latitude}.json?access_token=${import.meta.env.VITE_MAPBOX_TOKEN}&types=place&language=fr`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${position.coords.longitude},${position.coords.latitude}.json?access_token=${MAPBOX_TOKEN}&types=place&language=fr`
       );
 
       if (!response.ok) throw new Error("Erreur lors de la récupération de la ville");

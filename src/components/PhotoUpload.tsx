@@ -4,6 +4,7 @@ import { Upload, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { PhotoPreview } from "./PhotoPreview";
+import { processImage } from "@/utils/imageUtils";
 
 interface PhotoUploadProps {
   onPhotosChange: (files: File[]) => void;
@@ -14,6 +15,7 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
   const [previewIndex, setPreviewIndex] = useState<number>(-1);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const updatePreviews = (files: File[]) => {
     const newPreviews = files.map(file => URL.createObjectURL(file));
@@ -23,12 +25,12 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
     });
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    handleFiles(files);
+    await handleFiles(files);
   };
 
-  const handleFiles = (files: File[]) => {
+  const handleFiles = async (files: File[]) => {
     const totalFiles = selectedFiles.length + files.length;
     if (totalFiles > 10) {
       toast.error("Vous ne pouvez pas télécharger plus de 10 photos");
@@ -43,9 +45,20 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
       return isValid;
     });
 
-    const newFiles = [...selectedFiles, ...validFiles];
-    onPhotosChange(newFiles);
-    updatePreviews(newFiles);
+    if (validFiles.length === 0) return;
+
+    setIsProcessing(true);
+    try {
+      const processedFiles = await Promise.all(validFiles.map(processImage));
+      const newFiles = [...selectedFiles, ...processedFiles];
+      onPhotosChange(newFiles);
+      updatePreviews(newFiles);
+    } catch (error) {
+      console.error("Erreur lors du traitement des images:", error);
+      toast.error("Une erreur est survenue lors du traitement des images");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -57,11 +70,11 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
+    await handleFiles(files);
   };
 
   const removeFile = (index: number) => {
@@ -87,7 +100,7 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
       >
         <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-4 text-muted-foreground" />
         <h3 className="text-lg sm:text-xl font-semibold mb-2">
-          Déposez vos photos ici
+          {isProcessing ? "Traitement des images..." : "Déposez vos photos ici"}
         </h3>
         <p className="text-sm sm:text-base text-muted-foreground mb-4">
           ou
@@ -106,6 +119,7 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             onClick={() => document.getElementById('file-upload')?.click()}
             type="button"
             className="w-full sm:w-auto"
+            disabled={isProcessing}
           >
             Sélectionner des fichiers
           </Button>
@@ -118,6 +132,7 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             type="button"
             variant="outline"
             className="w-full sm:w-auto"
+            disabled={isProcessing}
           >
             Prendre une photo
           </Button>
