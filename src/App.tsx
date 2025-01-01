@@ -5,15 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Préchargement du composant Index
-const Index = lazy(() => import("@/pages/Index").then(module => {
-  return new Promise(resolve => {
-    // Petit délai pour s'assurer que tout est bien chargé
-    setTimeout(() => {
-      resolve(module);
-    }, 100);
-  });
-}));
+// Préchargement du composant Index de manière simplifiée
+const Index = lazy(() => import("@/pages/Index"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
