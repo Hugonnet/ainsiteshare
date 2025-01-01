@@ -59,8 +59,8 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Ainsite Share <onboarding@resend.dev>',
-        to: ['contact@ainsite.net'],
+        from: 'Resend <onboarding@resend.dev>',
+        to: ['ainsitenet@gmail.com'], // Temporairement, uniquement vers cette adresse
         subject: `Nouvelle réalisation - ${companyName}`,
         html: emailHtml,
       }),
