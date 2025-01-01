@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { Upload } from "lucide-react";
+import { PhotoUpload } from "./PhotoUpload";
 
 const formSchema = z.object({
   companyName: z.string().min(2, {
@@ -42,14 +42,12 @@ export function ProjectForm() {
     },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      setSelectedFiles(Array.from(files));
-    }
-  };
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (selectedFiles.length === 0) {
+      toast.error("Veuillez sélectionner au moins une photo");
+      return;
+    }
+
     try {
       setIsUploading(true);
       const photoPaths: string[] = [];
@@ -156,35 +154,10 @@ export function ProjectForm() {
         />
         <div className="space-y-4">
           <FormLabel>Photos</FormLabel>
-          <div className="flex items-center justify-center w-full">
-            <label
-              htmlFor="file-upload"
-              className="glass flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer hover:bg-white/5 transition-colors"
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-12 h-12 mb-4 text-muted-foreground" />
-                <p className="mb-2 text-sm text-muted-foreground">
-                  <span className="font-semibold">Cliquez pour télécharger</span> ou glissez-déposez
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  PNG, JPG ou WEBP (MAX. 10 Mo)
-                </p>
-              </div>
-              <input
-                id="file-upload"
-                type="file"
-                className="hidden"
-                multiple
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-            </label>
-          </div>
-          {selectedFiles.length > 0 && (
-            <div className="text-sm text-muted-foreground">
-              {selectedFiles.length} fichier(s) sélectionné(s)
-            </div>
-          )}
+          <PhotoUpload 
+            selectedFiles={selectedFiles}
+            onPhotosChange={setSelectedFiles}
+          />
         </div>
         <Button type="submit" disabled={isUploading}>
           {isUploading ? "Envoi en cours..." : "Soumettre le projet"}
