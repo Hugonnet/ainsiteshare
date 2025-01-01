@@ -2,8 +2,6 @@ import { lazy, Suspense } from "react";
 import { Header } from "@/components/Header";
 
 const ProjectForm = lazy(() => import("@/components/ProjectForm"));
-const Fireworks = lazy(() => import("@/components/Fireworks"));
-const SuccessMessage = lazy(() => import("@/components/SuccessMessage"));
 
 const Index = () => {
   return (
