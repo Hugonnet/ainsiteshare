@@ -5,7 +5,7 @@ interface SuccessMessageProps {
   city: string;
 }
 
-export const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
+const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
