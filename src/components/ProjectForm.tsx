@@ -6,11 +6,13 @@ import { toast } from "sonner";
 import { supabase, getPhotoUrl } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { ProjectFormFields, formSchema } from "./ProjectFormFields";
+import { Fireworks } from "./Fireworks";
 import type { z } from "zod";
 
 export function ProjectForm() {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [showFireworks, setShowFireworks] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -71,6 +73,9 @@ export function ProjectForm() {
         console.error('Error sending email:', emailError);
       }
 
+      setShowFireworks(true);
+      setTimeout(() => setShowFireworks(false), 5000);
+      
       toast.success("Projet soumis avec succès !");
       form.reset();
       setSelectedFiles([]);
@@ -83,21 +88,24 @@ export function ProjectForm() {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <ProjectFormFields 
-          form={form}
-          selectedFiles={selectedFiles}
-          setSelectedFiles={setSelectedFiles}
-        />
-        <Button 
-          type="submit" 
-          disabled={isUploading} 
-          className="w-full sm:w-auto text-lg px-8 py-6"
-        >
-          {isUploading ? "Envoi en cours..." : "Soumettre le projet"}
-        </Button>
-      </form>
-    </Form>
+    <>
+      {showFireworks && <Fireworks />}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <ProjectFormFields 
+            form={form}
+            selectedFiles={selectedFiles}
+            setSelectedFiles={setSelectedFiles}
+          />
+          <Button 
+            type="submit" 
+            disabled={isUploading} 
+            className="w-full sm:w-auto text-lg px-8 py-6"
+          >
+            {isUploading ? "Envoi en cours..." : "Soumettre le projet"}
+          </Button>
+        </form>
+      </Form>
+    </>
   );
 }

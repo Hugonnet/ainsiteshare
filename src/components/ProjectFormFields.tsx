@@ -4,6 +4,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { PhotoUpload } from "./PhotoUpload";
+import { Button } from "./ui/button";
+import { MapPin } from "lucide-react";
+import { toast } from "sonner";
 
 export const formSchema = z.object({
   companyName: z.string().min(2, {
@@ -31,6 +34,36 @@ interface ProjectFormFieldsProps {
 }
 
 export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: ProjectFormFieldsProps) => {
+  const getLocation = async () => {
+    if (!navigator.geolocation) {
+      toast.error("La géolocalisation n'est pas supportée par votre navigateur");
+      return;
+    }
+
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${position.coords.longitude},${position.coords.latitude}.json?access_token=${import.meta.env.VITE_MAPBOX_TOKEN}&types=place&language=fr`
+      );
+
+      if (!response.ok) throw new Error("Erreur lors de la récupération de la ville");
+
+      const data = await response.json();
+      const city = data.features[0]?.text;
+      
+      if (city) {
+        form.setValue("city", city);
+        toast.success(`Localisation trouvée : ${city}`);
+      }
+    } catch (error) {
+      console.error("Erreur de géolocalisation:", error);
+      toast.error("Impossible de récupérer votre position");
+    }
+  };
+
   return (
     <>
       <FormField
@@ -52,9 +85,20 @@ export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: Pro
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-lg">Ville de la réalisation</FormLabel>
-            <FormControl>
-              <Input placeholder="Ville" className="text-lg" {...field} />
-            </FormControl>
+            <div className="flex gap-2">
+              <FormControl>
+                <Input placeholder="Ville" className="text-lg" {...field} />
+              </FormControl>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={getLocation}
+                className="shrink-0"
+              >
+                <MapPin className="h-5 w-5" />
+              </Button>
+            </div>
             <FormMessage />
           </FormItem>
         )}
