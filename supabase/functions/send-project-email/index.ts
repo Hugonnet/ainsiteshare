@@ -47,17 +47,19 @@ serve(async (req) => {
         <p style="margin: 10px 0;"><strong>Description :</strong> ${description}</p>
       </div>
       
-      <h3 style="color: #333; font-family: sans-serif;">Photos du projet :</h3>
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px;">
-        ${photoUrls.map(url => `
-          <div style="text-align: center;">
-            <img src="${url}" alt="Photo du projet" style="max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 10px;">
-            <a href="${url}" style="display: inline-block; padding: 8px 16px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 4px; font-family: sans-serif;">
-              Voir l'image
-            </a>
-          </div>
-        `).join('')}
-      </div>
+      ${photoUrls.length > 0 ? `
+        <h3 style="color: #333; font-family: sans-serif;">Photos du projet :</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+          ${photoUrls.map(url => `
+            <div style="text-align: center;">
+              <img src="${url}" alt="Photo du projet" style="width: 100%; max-width: 300px; height: auto; border-radius: 8px; margin-bottom: 10px;">
+              <a href="${url}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 4px; font-family: sans-serif;">
+                Voir l'image
+              </a>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
     `;
 
     console.log('Sending email...');

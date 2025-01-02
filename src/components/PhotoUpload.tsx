@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Upload, Camera, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PhotoUploadProps {
   onPhotosChange: (files: File[]) => void;
@@ -12,6 +13,7 @@ interface PhotoUploadProps {
 export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
+  const isMobile = useIsMobile();
 
   const updatePreviews = (files: File[]) => {
     const newPreviews = files.map(file => URL.createObjectURL(file));
@@ -121,6 +123,7 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             type="file"
             className="hidden"
             multiple
+            capture={isMobile ? undefined : undefined}
             accept="image/*"
             onChange={handleFileChange}
           />
