@@ -52,7 +52,7 @@ serve(async (req) => {
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
           ${photoUrls.map(url => `
             <div style="text-align: center;">
-              <img src="${url}" alt="Photo du projet" style="width: 100%; max-width: 300px; height: auto; border-radius: 8px; margin-bottom: 10px;">
+              <img src="${url}" alt="Photo du projet" style="max-width: 300px; width: 100%; height: auto; border-radius: 8px; margin-bottom: 10px;">
               <a href="${url}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 4px; font-family: sans-serif;">
                 Voir l'image
               </a>

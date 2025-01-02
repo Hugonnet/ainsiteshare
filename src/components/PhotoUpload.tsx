@@ -123,7 +123,6 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             type="file"
             className="hidden"
             multiple
-            capture={isMobile ? undefined : undefined}
             accept="image/*"
             onChange={handleFileChange}
           />
@@ -134,14 +133,16 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             <Upload className="mr-2" />
             Sélectionner des fichiers
           </Button>
-          <Button 
-            onClick={handleCameraCapture}
-            type="button"
-            variant="secondary"
-          >
-            <Camera className="mr-2" />
-            Prendre une photo
-          </Button>
+          {isMobile && (
+            <Button 
+              onClick={handleCameraCapture}
+              type="button"
+              variant="secondary"
+            >
+              <Camera className="mr-2" />
+              Prendre une photo
+            </Button>
+          )}
         </div>
         <p className="text-sm text-muted-foreground mt-4">
           Maximum 10 photos au format PNG, JPG ou WEBP
