@@ -5,7 +5,7 @@ interface SuccessMessageProps {
   city: string;
 }
 
-const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
+export const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -36,5 +36,3 @@ const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
     </motion.div>
   );
 };
-
-export default SuccessMessage;

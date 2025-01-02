@@ -8,17 +8,6 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    cors: {
-      origin: [
-        "https://gptengineer.app",
-        "https://lovable.dev",
-        "https://ainsite-snapshot-sphere.lovable.app",
-        "http://localhost:3000",
-        "https://ainsite-snapshot-sphere-private.lovable.app"
-      ],
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      credentials: true
-    }
   },
   plugins: [
     react(),

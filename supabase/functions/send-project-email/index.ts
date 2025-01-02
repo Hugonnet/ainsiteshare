@@ -7,12 +7,13 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { companyName, city, description, photoUrls, department } = await req.json();
+    const { companyName, city, description, photoPaths } = await req.json();
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
     if (!RESEND_API_KEY) {
@@ -20,27 +21,37 @@ serve(async (req) => {
       throw new Error('Email service configuration is missing');
     }
 
+    // Create Supabase client
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Get public URLs for the photos
+    const photoUrls = await Promise.all(
+      photoPaths.map(async (path: string) => {
+        const { data } = supabaseAdmin.storage
+          .from('project_photos')
+          .getPublicUrl(path);
+        return data.publicUrl;
+      })
+    );
+
+    // Create email content with HTML formatting
     const emailHtml = `
       <h2>Nouvelle soumission de projet</h2>
       
       <p><strong>Entreprise :</strong> ${companyName}</p>
       <p><strong>Ville :</strong> ${city}</p>
-      <p><strong>Département :</strong> ${department}</p>
       <p><strong>Description :</strong> ${description}</p>
       
       <h3>Photos :</h3>
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
-        ${photoUrls.map(url => `
-          <div style="text-align: center;">
-            <img src="${url}" alt="Photo du projet" style="max-width: 100%; height: auto; margin-bottom: 8px; border-radius: 8px;">
-            <a href="${url}" style="display: inline-block; padding: 8px 16px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 4px;">
-              Voir en grand
-            </a>
-          </div>
-        `).join('')}
-      </div>
+      <ul>
+        ${photoUrls.map(url => `<li><a href="${url}">Voir la photo</a></li>`).join('\n')}
+      </ul>
     `;
 
+    // Send email using Resend
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -49,8 +60,8 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'Resend <onboarding@resend.dev>',
-        to: ['ainsitenet@gmail.com'],
-        subject: `Nouvelle réalisation - ${companyName} à ${city}`,
+        to: ['ainsitenet@gmail.com'], // Temporairement, uniquement vers cette adresse
+        subject: `Nouvelle réalisation - ${companyName}`,
         html: emailHtml,
       }),
     });
