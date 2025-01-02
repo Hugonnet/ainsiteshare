@@ -12,9 +12,10 @@ serve(async (req) => {
   }
 
   try {
-    const { companyName, city, description, photoPaths, department } = await req.json();
-    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+    const { companyName, city, description, photoPaths = [], department } = await req.json();
+    console.log('Received request data:', { companyName, city, description, photoPaths, department });
 
+    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
     if (!RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not set');
       throw new Error('Email service configuration is missing');
@@ -25,14 +26,16 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    console.log('Getting public URLs for photos...');
     const photoUrls = await Promise.all(
-      photoPaths.map(async (path: string) => {
+      (photoPaths || []).map(async (path: string) => {
         const { data } = supabaseAdmin.storage
           .from('project_photos')
           .getPublicUrl(path);
         return data.publicUrl;
       })
     );
+    console.log('Photo URLs generated:', photoUrls);
 
     const emailHtml = `
       <h2 style="color: #333; font-family: sans-serif;">Nouvelle soumission de projet</h2>
@@ -57,6 +60,7 @@ serve(async (req) => {
       </div>
     `;
 
+    console.log('Sending email...');
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
