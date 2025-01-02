@@ -129,6 +129,7 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
           <Button 
             onClick={() => document.getElementById('file-upload')?.click()}
             type="button"
+            className="file-upload-button"
           >
             <Upload className="mr-2" />
             Choisir des photos
