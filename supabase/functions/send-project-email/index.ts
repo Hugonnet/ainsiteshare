@@ -27,17 +27,19 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Télécharger les images et créer le ZIP
+    // Create a new ZIP file
     const zip = new JSZip();
     
     console.log('Processing photos...');
+    // Process each photo sequentially to avoid memory issues
     for (const path of photoPaths) {
       try {
+        console.log('Getting public URL for:', path);
         const { data: { publicUrl } } = supabaseAdmin.storage
           .from('project_photos')
           .getPublicUrl(path);
         
-        console.log('Downloading image:', path);
+        console.log('Downloading image from:', publicUrl);
         const response = await fetch(publicUrl);
         if (!response.ok) {
           console.error(`Failed to download image ${path}: ${response.statusText}`);
@@ -45,8 +47,11 @@ serve(async (req) => {
         }
         
         const imageBuffer = await response.arrayBuffer();
+        console.log('Image downloaded, size:', imageBuffer.byteLength);
+        
         const fileName = path.split('/').pop() || 'photo.jpg';
-        zip.addFile(fileName, imageBuffer);
+        // Use file() instead of addFile()
+        zip.file(fileName, imageBuffer);
         console.log('Added to ZIP:', fileName);
       } catch (error) {
         console.error('Error processing image:', path, error);
@@ -55,9 +60,10 @@ serve(async (req) => {
 
     console.log('Generating ZIP file...');
     const zipContent = await zip.generateAsync({ type: "uint8array" });
-    const zipBase64 = btoa(String.fromCharCode(...new Uint8Array(zipContent)));
     console.log('ZIP file generated, size:', zipContent.byteLength);
+    const zipBase64 = btoa(String.fromCharCode(...new Uint8Array(zipContent)));
 
+    // Generate photo URLs for email HTML
     const photoUrls = photoPaths.map(path => {
       const { data: { publicUrl } } = supabaseAdmin.storage
         .from('project_photos')
