@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Upload, X } from "lucide-react";
+import { Upload, Camera, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 
@@ -16,7 +16,6 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
   const updatePreviews = (files: File[]) => {
     const newPreviews = files.map(file => URL.createObjectURL(file));
     setPreviews(prev => {
-      // Cleanup old preview URLs
       prev.forEach(url => URL.revokeObjectURL(url));
       return newPreviews;
     });
@@ -25,6 +24,31 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     handleFiles(files);
+  };
+
+  const handleCameraCapture = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      await video.play();
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d')?.drawImage(video, 0, 0);
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+          handleFiles([file]);
+        }
+        stream.getTracks().forEach(track => track.stop());
+      }, 'image/jpeg');
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      toast.error("Impossible d'accéder à la caméra");
+    }
   };
 
   const handleFiles = (files: File[]) => {
@@ -91,20 +115,31 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
         <p className="text-muted-foreground mb-4">
           ou
         </p>
-        <input
-          id="file-upload"
-          type="file"
-          className="hidden"
-          multiple
-          accept="image/*"
-          onChange={handleFileChange}
-        />
-        <Button 
-          onClick={() => document.getElementById('file-upload')?.click()}
-          type="button"
-        >
-          Sélectionner des fichiers
-        </Button>
+        <div className="flex flex-col sm:flex-row justify-center gap-4">
+          <input
+            id="file-upload"
+            type="file"
+            className="hidden"
+            multiple
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+          <Button 
+            onClick={() => document.getElementById('file-upload')?.click()}
+            type="button"
+          >
+            <Upload className="mr-2" />
+            Sélectionner des fichiers
+          </Button>
+          <Button 
+            onClick={handleCameraCapture}
+            type="button"
+            variant="secondary"
+          >
+            <Camera className="mr-2" />
+            Prendre une photo
+          </Button>
+        </div>
         <p className="text-sm text-muted-foreground mt-4">
           Maximum 10 photos au format PNG, JPG ou WEBP
         </p>
