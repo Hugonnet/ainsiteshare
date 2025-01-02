@@ -124,6 +124,7 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             className="hidden"
             multiple
             accept="image/*"
+            capture={false}
             onChange={handleFileChange}
           />
           <Button 
