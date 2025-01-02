@@ -29,31 +29,41 @@ serve(async (req) => {
 
     console.log('Getting public URLs for photos...');
     const photoUrls = await Promise.all(
-      (photoPaths || []).map(async (path: string) => {
-        const { data } = supabaseAdmin.storage
+      photoPaths.map(async (path: string) => {
+        const { data: { publicUrl } } = supabaseAdmin.storage
           .from('project_photos')
           .getPublicUrl(path);
-        return { url: data.publicUrl, path };
+        
+        // Télécharger l'image depuis l'URL publique
+        const response = await fetch(publicUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to download image: ${path}`);
+        }
+        const imageBuffer = await response.arrayBuffer();
+        
+        return {
+          url: publicUrl,
+          path,
+          buffer: imageBuffer
+        };
       })
     );
-    console.log('Photo URLs generated:', photoUrls);
+    console.log('Photo URLs and buffers generated:', photoUrls.length);
 
     // Create ZIP file with photos
     const zip = new JSZip();
     
-    // Download and add each photo to the ZIP
-    await Promise.all(
-      photoUrls.map(async ({ url, path }) => {
-        const response = await fetch(url);
-        const imageData = await response.arrayBuffer();
-        const fileName = path.split('/').pop() || 'photo.jpg';
-        zip.addFile(fileName, imageData);
-      })
-    );
+    // Add each photo to the ZIP
+    photoUrls.forEach(({ buffer, path }) => {
+      const fileName = path.split('/').pop() || 'photo.jpg';
+      zip.addFile(fileName, buffer);
+    });
 
     // Generate ZIP file
+    console.log('Generating ZIP file...');
     const zipContent = await zip.generateAsync({ type: "uint8array" });
     const zipBase64 = btoa(String.fromCharCode(...new Uint8Array(zipContent)));
+    console.log('ZIP file generated, size:', zipContent.byteLength);
 
     const emailHtml = `
       <h2 style="color: #333; font-family: sans-serif;">Nouvelle soumission de projet</h2>

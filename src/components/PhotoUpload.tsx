@@ -124,7 +124,6 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             className="hidden"
             multiple
             accept="image/*"
-            capture={false}
             onChange={handleFileChange}
           />
           <Button 
@@ -132,7 +131,7 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             type="button"
           >
             <Upload className="mr-2" />
-            Sélectionner des fichiers
+            Choisir des photos
           </Button>
           {isMobile && (
             <Button 
