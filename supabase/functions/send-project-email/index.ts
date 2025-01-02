@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { JSZip } from "https://deno.land/x/jszip@0.11.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,10 +33,27 @@ serve(async (req) => {
         const { data } = supabaseAdmin.storage
           .from('project_photos')
           .getPublicUrl(path);
-        return data.publicUrl;
+        return { url: data.publicUrl, path };
       })
     );
     console.log('Photo URLs generated:', photoUrls);
+
+    // Create ZIP file with photos
+    const zip = new JSZip();
+    
+    // Download and add each photo to the ZIP
+    await Promise.all(
+      photoUrls.map(async ({ url, path }) => {
+        const response = await fetch(url);
+        const imageData = await response.arrayBuffer();
+        const fileName = path.split('/').pop() || 'photo.jpg';
+        zip.addFile(fileName, imageData);
+      })
+    );
+
+    // Generate ZIP file
+    const zipContent = await zip.generateAsync({ type: "uint8array" });
+    const zipBase64 = btoa(String.fromCharCode(...new Uint8Array(zipContent)));
 
     const emailHtml = `
       <h2 style="color: #333; font-family: sans-serif;">Nouvelle soumission de projet</h2>
@@ -50,7 +68,7 @@ serve(async (req) => {
       ${photoUrls.length > 0 ? `
         <h3 style="color: #333; font-family: sans-serif;">Photos du projet :</h3>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
-          ${photoUrls.map(url => `
+          ${photoUrls.map(({ url }) => `
             <div style="text-align: center;">
               <img src="${url}" alt="Photo du projet" style="max-width: 300px; width: 100%; height: auto; border-radius: 8px; margin-bottom: 10px;">
               <a href="${url}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 4px; font-family: sans-serif;">
@@ -74,6 +92,10 @@ serve(async (req) => {
         to: ['ainsitenet@gmail.com'],
         subject: `Nouvelle réalisation - ${companyName} à ${city}`,
         html: emailHtml,
+        attachments: [{
+          filename: 'photos.zip',
+          content: zipBase64,
+        }],
       }),
     });
 
