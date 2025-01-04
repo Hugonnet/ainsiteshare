@@ -100,7 +100,7 @@ serve(async (req) => {
           <h3 style="color: #1a1a1a;">Description audio:</h3>
           <audio controls>
             <source src="${audioUrl.publicUrl}" type="audio/webm">
-            Votre navigateur ne supporte pas l'élément audio.
+            Your browser does not support the audio element.
           </audio>
         </div>
       `;
