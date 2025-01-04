@@ -57,18 +57,18 @@ export const CityField = ({ form }: CityFieldProps) => {
       render={({ field }) => (
         <FormItem>
           <FormLabel className="text-lg whitespace-nowrap">Ville de la réalisation</FormLabel>
-          <div className="relative">
-            <FormControl>
-              <Input placeholder="Ville concernée" className="text-lg pr-32" {...field} />
-            </FormControl>
+          <div className="flex flex-col gap-2">
             <Button
               type="button"
               onClick={getLocation}
-              className="absolute right-1 top-1/2 -translate-y-1/2 bg-[#39FF14] hover:bg-[#32E512] text-black font-semibold h-8 px-3"
+              className="bg-[#39FF14] hover:bg-[#32E512] text-black font-semibold h-8 w-fit mx-auto"
             >
               <MapPin className="h-4 w-4 mr-1" />
               Localiser
             </Button>
+            <FormControl>
+              <Input placeholder="Ville concernée" className="text-lg" {...field} />
+            </FormControl>
           </div>
           <FormMessage />
         </FormItem>
