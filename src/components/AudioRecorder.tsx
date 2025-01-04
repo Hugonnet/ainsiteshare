@@ -57,13 +57,13 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
   };
 
   return (
-    <div className="flex gap-2 justify-center mt-4">
+    <div className="flex gap-2 justify-start">
       {!hasRecording ? (
         <Button
           type="button"
-          variant={isRecording ? "destructive" : "outline"}
+          variant="outline"
           onClick={isRecording ? stopRecording : startRecording}
-          className="w-full"
+          className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20"
         >
           {isRecording ? (
             <>
@@ -82,7 +82,7 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
           type="button"
           variant="outline"
           onClick={deleteRecording}
-          className="w-full"
+          className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20"
         >
           <Square className="h-4 w-4 mr-2" />
           Supprimer l'enregistrement

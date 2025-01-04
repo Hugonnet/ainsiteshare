@@ -46,17 +46,19 @@ export const ProjectFormFields = ({
       <CompanyNameField form={form} />
       <CityField form={form} />
       <DepartmentField form={form} />
-      <DescriptionField form={form} />
-      <div className="flex justify-center">
+      <div className="space-y-4">
+        <DescriptionField form={form} />
+        <AudioRecorder 
+          onAudioRecorded={(blob) => setAudioBlob(blob)}
+          onAudioDeleted={() => setAudioBlob(null)}
+        />
+      </div>
+      <div className="flex justify-center mt-8">
         <PhotoUpload 
           selectedFiles={selectedFiles}
           onPhotosChange={setSelectedFiles}
         />
       </div>
-      <AudioRecorder 
-        onAudioRecorded={(blob) => setAudioBlob(blob)}
-        onAudioDeleted={() => setAudioBlob(null)}
-      />
     </>
   );
 };
