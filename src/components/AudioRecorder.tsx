@@ -109,7 +109,6 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
     e.preventDefault();
     setHasRecording(false);
     onAudioRecorded(null);
-    // Appel de onAudioDeleted si la prop existe
     onAudioDeleted?.();
     toast({
       title: "Suppression",
@@ -127,7 +126,7 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
             type="button"
           >
             <Mic className="h-4 w-4" />
-            Enregistrer
+            Enregiter
           </Button>
         )}
         
