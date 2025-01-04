@@ -50,7 +50,9 @@ export const Fireworks = () => {
     }
 
     let particles: Particle[] = [];
-    const colors = ["#FF0000", "#FF00FF", "#0000FF"];
+    const colors = ["#FF0000", "#FF00FF", "#0000FF", "#FFFF00", "#00FF00"];
+    let startTime = Date.now();
+    const duration = 4000; // 4 seconds
 
     const createFirework = (x: number, y: number) => {
       const particleCount = 50;
@@ -63,6 +65,12 @@ export const Fireworks = () => {
 
     const animate = () => {
       if (!ctx) return;
+      
+      const elapsed = Date.now() - startTime;
+      if (elapsed >= duration) {
+        return;
+      }
+
       ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 

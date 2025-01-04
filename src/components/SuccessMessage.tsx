@@ -21,18 +21,19 @@ export const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
         initial={{ y: 20 }}
         animate={{ y: 0 }}
         transition={{ delay: 0.5 }}
-        className="text-4xl font-bold mb-4"
+        className="text-6xl font-bold mb-8 text-white"
       >
-        Félicitations {company} !
+        Envoi réalisé avec succès
       </motion.h1>
-      <motion.p
+      <motion.div
         initial={{ y: 20 }}
         animate={{ y: 0 }}
         transition={{ delay: 0.7 }}
-        className="text-xl text-muted-foreground"
+        className="text-xl text-white/80"
       >
-        Vos magnifiques réalisations à {city} sont maintenant partagées
-      </motion.p>
+        <p className="mb-2">Félicitations {company} !</p>
+        <p>Vos magnifiques réalisations à {city} sont maintenant partagées</p>
+      </motion.div>
     </motion.div>
   );
 };
