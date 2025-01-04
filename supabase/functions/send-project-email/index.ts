@@ -106,7 +106,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'contact@ainsite.fr',
-        to: ['contact@ainsite.fr'],
+        to: ['ainsitenet@gmail.com'],
         subject: `Nouvelle réalisation de ${companyName} à ${city}`,
         html: `
           <h1>Nouvelle réalisation</h1>

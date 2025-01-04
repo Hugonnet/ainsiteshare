@@ -30,7 +30,11 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
 
   const handleCameraCapture = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: { exact: "environment" } 
+        } 
+      });
       const video = document.createElement('video');
       video.srcObject = stream;
       await video.play();
