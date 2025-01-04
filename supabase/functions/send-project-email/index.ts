@@ -105,7 +105,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'contact@ainsite.fr',
+        from: 'Ainsite <onboarding@resend.dev>',
         to: ['ainsitenet@gmail.com'],
         subject: `Nouvelle réalisation de ${companyName} à ${city}`,
         html: `
