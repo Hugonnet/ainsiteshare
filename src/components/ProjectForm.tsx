@@ -10,6 +10,7 @@ import type { z } from "zod";
 export function ProjectForm() {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -30,7 +31,9 @@ export function ProjectForm() {
     try {
       setIsUploading(true);
       const photoPaths: string[] = [];
+      let audioPath: string | undefined;
 
+      // Upload photos
       for (const file of selectedFiles) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
@@ -42,6 +45,17 @@ export function ProjectForm() {
         photoPaths.push(fileName);
       }
 
+      // Upload audio if exists
+      if (audioBlob) {
+        const audioFileName = `${crypto.randomUUID()}.webm`;
+        const { error: audioUploadError } = await supabase.storage
+          .from('project_photos')
+          .upload(audioFileName, audioBlob);
+
+        if (audioUploadError) throw audioUploadError;
+        audioPath = audioFileName;
+      }
+
       const { error: insertError } = await supabase
         .from('project_submissions')
         .insert({
@@ -50,6 +64,7 @@ export function ProjectForm() {
           department: values.department,
           description: values.description,
           photo_paths: photoPaths,
+          audio_path: audioPath,
         });
 
       if (insertError) throw insertError;
@@ -61,6 +76,7 @@ export function ProjectForm() {
           department: values.department,
           description: values.description,
           photoPaths,
+          audioPath,
         },
       });
 
@@ -71,6 +87,7 @@ export function ProjectForm() {
       toast.success("Projet soumis avec succès !");
       form.reset();
       setSelectedFiles([]);
+      setAudioBlob(null);
     } catch (error) {
       console.error('Error submitting project:', error);
       toast.error("Une erreur est survenue lors de la soumission du projet.");
@@ -86,6 +103,8 @@ export function ProjectForm() {
           form={form}
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
+          audioBlob={audioBlob}
+          setAudioBlob={setAudioBlob}
         />
         <div className="flex justify-center">
           <button 

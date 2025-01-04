@@ -5,6 +5,7 @@ import { CompanyNameField } from "./form-fields/CompanyNameField";
 import { CityField } from "./form-fields/CityField";
 import { DepartmentField } from "./form-fields/DepartmentField";
 import { DescriptionField } from "./form-fields/DescriptionField";
+import { AudioRecorder } from "./AudioRecorder";
 
 export const formSchema = z.object({
   companyName: z.string().min(2, {
@@ -29,9 +30,17 @@ interface ProjectFormFieldsProps {
   form: UseFormReturn<FormData>;
   selectedFiles: File[];
   setSelectedFiles: (files: File[]) => void;
+  audioBlob: Blob | null;
+  setAudioBlob: (blob: Blob | null) => void;
 }
 
-export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: ProjectFormFieldsProps) => {
+export const ProjectFormFields = ({ 
+  form, 
+  selectedFiles, 
+  setSelectedFiles,
+  audioBlob,
+  setAudioBlob
+}: ProjectFormFieldsProps) => {
   return (
     <>
       <CompanyNameField form={form} />
@@ -44,6 +53,10 @@ export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: Pro
           onPhotosChange={setSelectedFiles}
         />
       </div>
+      <AudioRecorder 
+        onAudioRecorded={(blob) => setAudioBlob(blob)}
+        onAudioDeleted={() => setAudioBlob(null)}
+      />
     </>
   );
 };
