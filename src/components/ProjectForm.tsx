@@ -7,7 +7,11 @@ import { useState } from "react";
 import { ProjectFormFields, formSchema } from "./ProjectFormFields";
 import type { z } from "zod";
 
-export function ProjectForm() {
+interface ProjectFormProps {
+  onSubmissionSuccess: (company: string, city: string) => void;
+}
+
+export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -85,6 +89,7 @@ export function ProjectForm() {
       }
 
       toast.success("Projet soumis avec succès !");
+      onSubmissionSuccess(values.companyName, values.city);
       form.reset();
       setSelectedFiles([]);
       setAudioBlob(null);
