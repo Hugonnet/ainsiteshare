@@ -89,8 +89,7 @@ export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: Pro
           </FormItem>
         )}
       />
-      <div className="space-y-4">
-        <FormLabel className="text-lg">Photos</FormLabel>
+      <div className="flex justify-center">
         <PhotoUpload 
           selectedFiles={selectedFiles}
           onPhotosChange={setSelectedFiles}

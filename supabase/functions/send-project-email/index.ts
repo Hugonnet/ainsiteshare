@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
-import { JSZip } from "https://deno.land/x/jszip@0.11.0/mod.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { Resend } from "https://esm.sh/@resend/node";
+import JSZip from "https://esm.sh/jszip@3.10.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,25 +14,18 @@ serve(async (req) => {
   }
 
   try {
-    const { companyName, city, description, photoPaths = [], department } = await req.json();
-    console.log('Received request data:', { companyName, city, description, photoPaths, department });
+    const { companyName, city, department, description, photoPaths } = await req.json();
 
-    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-    if (!RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not set');
-      throw new Error('Email service configuration is missing');
-    }
-
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Create a new ZIP file
     const zip = new JSZip();
+    const folder = zip.folder("photos");
     
     console.log('Processing photos...');
-    // Process each photo sequentially to avoid memory issues
     for (const path of photoPaths) {
       try {
         console.log('Getting public URL for:', path);
@@ -42,99 +36,68 @@ serve(async (req) => {
         console.log('Downloading image from:', publicUrl);
         const response = await fetch(publicUrl);
         if (!response.ok) {
-          console.error(`Failed to download image ${path}: ${response.statusText}`);
-          continue;
+          throw new Error(`Failed to download image ${path}: ${response.statusText}`);
         }
         
-        const imageBuffer = await response.arrayBuffer();
-        console.log('Image downloaded, size:', imageBuffer.byteLength);
-        
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
         const fileName = path.split('/').pop() || 'photo.jpg';
-        // Use file() instead of addFile()
-        zip.file(fileName, imageBuffer);
-        console.log('Added to ZIP:', fileName);
+        
+        console.log(`Adding ${fileName} to ZIP, size: ${arrayBuffer.byteLength} bytes`);
+        folder.file(fileName, arrayBuffer);
       } catch (error) {
         console.error('Error processing image:', path, error);
       }
     }
 
     console.log('Generating ZIP file...');
-    const zipContent = await zip.generateAsync({ type: "uint8array" });
-    console.log('ZIP file generated, size:', zipContent.byteLength);
+    const zipContent = await zip.generateAsync({
+      type: "nodebuffer",
+      compression: "DEFLATE",
+      compressionOptions: { level: 6 }
+    });
+    
+    console.log('ZIP file generated, size:', zipContent.length);
     const zipBase64 = btoa(String.fromCharCode(...new Uint8Array(zipContent)));
 
-    // Generate photo URLs for email HTML
     const photoUrls = photoPaths.map(path => {
       const { data: { publicUrl } } = supabaseAdmin.storage
         .from('project_photos')
         .getPublicUrl(path);
-      return { url: publicUrl };
+      return publicUrl;
     });
 
-    const emailHtml = `
-      <h2 style="color: #333; font-family: sans-serif;">Nouvelle soumission de projet</h2>
-      
-      <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <p style="margin: 10px 0;"><strong>Entreprise :</strong> ${companyName}</p>
-        <p style="margin: 10px 0;"><strong>Ville :</strong> ${city}</p>
-        ${department ? `<p style="margin: 10px 0;"><strong>Département :</strong> ${department}</p>` : ''}
-        <p style="margin: 10px 0;"><strong>Description :</strong> ${description}</p>
-      </div>
-      
-      ${photoUrls.length > 0 ? `
-        <h3 style="color: #333; font-family: sans-serif;">Photos du projet :</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
-          ${photoUrls.map(({ url }) => `
-            <div style="text-align: center;">
-              <img src="${url}" alt="Photo du projet" style="max-width: 300px; width: 100%; height: auto; border-radius: 8px; margin-bottom: 10px;">
-              <a href="${url}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 4px; font-family: sans-serif;">
-                Voir l'image
-              </a>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
-    `;
-
-    console.log('Sending email...');
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'Resend <onboarding@resend.dev>',
-        to: ['ainsitenet@gmail.com'],
-        subject: `Nouvelle réalisation - ${companyName} à ${city}`,
-        html: emailHtml,
-        attachments: [{
-          filename: 'photos.zip',
-          content: zipBase64,
-        }],
-      }),
+    const { error } = await resend.emails.send({
+      from: 'contact@ainsite.fr',
+      to: ['contact@ainsite.fr'],
+      subject: `Nouvelle réalisation de ${companyName} à ${city}`,
+      html: `
+        <h1>Nouvelle réalisation</h1>
+        <p><strong>Entreprise :</strong> ${companyName}</p>
+        <p><strong>Ville :</strong> ${city}</p>
+        <p><strong>Département :</strong> ${department}</p>
+        <p><strong>Description :</strong> ${description}</p>
+        <h2>Photos</h2>
+        ${photoUrls.map(url => `<img src="${url}" style="max-width: 300px; margin: 10px 0;" />`).join('')}
+      `,
+      attachments: [{
+        filename: 'photos.zip',
+        content: zipBase64,
+      }],
     });
 
-    if (!res.ok) {
-      const errorData = await res.text();
-      console.error('Resend API error:', errorData);
-      throw new Error(`Failed to send email: ${errorData}`);
+    if (error) {
+      throw error;
     }
-
-    const data = await res.json();
-    console.log('Email sent successfully:', data);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error in send-project-email function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,9 +87,15 @@ export function ProjectForm() {
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
         />
-        <Button type="submit" disabled={isUploading} className="text-lg px-8 py-6">
-          {isUploading ? "Envoi en cours..." : "Soumettre le projet"}
-        </Button>
+        <div className="flex justify-center">
+          <button 
+            type="submit" 
+            disabled={isUploading} 
+            className="gradient-button text-white font-semibold text-lg px-8 py-4 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isUploading ? "Envoi en cours..." : "Soumettre le projet"}
+          </button>
+        </div>
       </form>
     </Form>
   );

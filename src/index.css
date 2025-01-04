@@ -69,3 +69,13 @@
     transform: translateY(0);
   }
 }
+
+.gradient-button {
+  background: linear-gradient(90deg, #FF0080 0%, #7928CA 50%, #2563EB 100%);
+  transition: all 0.3s ease;
+}
+
+.gradient-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
