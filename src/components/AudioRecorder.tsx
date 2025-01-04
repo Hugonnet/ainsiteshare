@@ -3,7 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Mic, Square, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-export const AudioRecorder = ({ onAudioRecorded }: { onAudioRecorded: (blob: Blob | null) => void }) => {
+interface AudioRecorderProps {
+  onAudioRecorded: (blob: Blob | null) => void;
+  onAudioDeleted?: () => void;  // Ajout de la nouvelle prop optionnelle
+}
+
+export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorderProps) => {
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecording, setHasRecording] = useState(false);
@@ -11,7 +16,7 @@ export const AudioRecorder = ({ onAudioRecorded }: { onAudioRecorded: (blob: Blo
   const chunksRef = useRef<Blob[]>([]);
 
   const startRecording = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     try {
       const constraints = {
         audio: {
@@ -23,7 +28,6 @@ export const AudioRecorder = ({ onAudioRecorded }: { onAudioRecorded: (blob: Blo
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       
-      // Déterminer le format audio supporté
       let mimeType = 'audio/webm';
       if (!MediaRecorder.isTypeSupported('audio/webm')) {
         if (MediaRecorder.isTypeSupported('audio/mp4')) {
@@ -51,7 +55,6 @@ export const AudioRecorder = ({ onAudioRecorded }: { onAudioRecorded: (blob: Blo
           setHasRecording(true);
           chunksRef.current = [];
 
-          // Arrêter proprement tous les tracks
           if (mediaRecorderRef.current?.stream) {
             mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
           }
@@ -82,7 +85,7 @@ export const AudioRecorder = ({ onAudioRecorded }: { onAudioRecorded: (blob: Blo
   };
 
   const stopRecording = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     if (mediaRecorderRef.current && isRecording) {
       try {
         mediaRecorderRef.current.stop();
@@ -103,9 +106,11 @@ export const AudioRecorder = ({ onAudioRecorded }: { onAudioRecorded: (blob: Blo
   };
 
   const deleteRecording = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     setHasRecording(false);
     onAudioRecorded(null);
+    // Appel de onAudioDeleted si la prop existe
+    onAudioDeleted?.();
     toast({
       title: "Suppression",
       description: "Enregistrement supprimé",
