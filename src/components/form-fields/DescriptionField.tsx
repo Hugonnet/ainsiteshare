@@ -28,7 +28,7 @@ export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionF
       name="description"
       render={({ field }) => (
         <FormItem className="space-y-4">
-          <FormLabel className="text-lg">Décrivez votre prestation</FormLabel>
+          <FormLabel className="text-lg">Type de prestation</FormLabel>
           <AudioRecorder 
             onAudioRecorded={(blob) => {
               setAudioBlob(blob);
