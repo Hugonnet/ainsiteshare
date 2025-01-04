@@ -30,12 +30,18 @@ export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionF
         <FormItem className="space-y-4">
           <FormLabel className="text-lg">Type de prestation</FormLabel>
           <AudioRecorder 
-            onAudioRecorded={(blob) => setAudioBlob(blob)}
+            onAudioRecorded={(blob) => {
+              setAudioBlob(blob);
+              // Si un enregistrement audio est présent, on met une valeur par défaut dans la description
+              if (!field.value) {
+                form.setValue('description', 'Description audio enregistrée');
+              }
+            }}
             onAudioDeleted={() => setAudioBlob(null)}
           />
           <FormControl>
             <Textarea
-              placeholder="Décrivez brièvement votre prestation en 1 phrase ..."
+              placeholder={audioBlob ? "" : "Décrivez brièvement votre prestation en 1 phrase ..."}
               className="resize-none text-lg placeholder:text-muted-foreground/50"
               {...field}
             />

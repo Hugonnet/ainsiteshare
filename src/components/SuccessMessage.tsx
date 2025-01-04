@@ -15,13 +15,13 @@ export const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
         delay: 0.2,
         ease: [0, 0.71, 0.2, 1.01]
       }}
-      className="text-center absolute inset-0 flex flex-col items-center justify-center"
+      className="fixed inset-0 flex flex-col items-center justify-center z-50"
     >
       <motion.h1
         initial={{ y: 20 }}
         animate={{ y: 0 }}
         transition={{ delay: 0.5 }}
-        className="text-7xl font-bold mb-12 text-white"
+        className="text-8xl font-bold mb-12 text-white text-center"
       >
         Projet soumis avec succès
       </motion.h1>
