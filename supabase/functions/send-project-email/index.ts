@@ -47,7 +47,7 @@ serve(async (req) => {
 
     const { error: emailError } = await resend.emails.send({
       from: 'Ainsite <onboarding@resend.dev>',
-      to: ['onboarding@resend.dev'], // Temporarily using Resend's default email
+      to: ['ainsitenet@gmail.com'],
       subject: `Nouvelle réalisation de ${companyName} à ${city}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -74,7 +74,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ message: "Email envoyé avec succès" }),
+      JSON.stringify({ message: "Envoi en cours" }),
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
