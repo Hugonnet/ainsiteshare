@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { Resend } from 'npm:resend'
+import { JSZip } from "https://deno.land/x/jszip@0.11.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,7 +30,30 @@ serve(async (req) => {
 
     const { companyName, city, department, description, photoPaths } = await req.json()
     
-    // Get public URLs for the photos
+    // Create a new zip file
+    const zip = new JSZip();
+    
+    // Get and add each photo to the zip
+    for (let i = 0; i < photoPaths.length; i++) {
+      const path = photoPaths[i];
+      const { data: photoData, error: photoError } = await supabaseClient.storage
+        .from('project_photos')
+        .download(path);
+
+      if (photoError) {
+        console.error(`Error downloading photo ${path}:`, photoError);
+        continue;
+      }
+
+      // Add the photo to the zip with a numbered filename
+      zip.addFile(`photo_${i + 1}.jpg`, await photoData.arrayBuffer());
+    }
+
+    // Generate the zip file
+    const zipContent = await zip.generateAsync({ type: "arraybuffer" });
+    const zipBuffer = new Uint8Array(zipContent);
+
+    // Get public URLs for the photos for email display
     const photoUrls = await Promise.all(
       photoPaths.map(async (path) => {
         const { data } = await supabaseClient.storage
@@ -67,14 +91,20 @@ serve(async (req) => {
           </div>
         </div>
       `,
-    })
+      attachments: [
+        {
+          filename: `photos_${companyName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.zip`,
+          content: zipBuffer,
+        },
+      ],
+    });
 
     if (emailError) {
       throw new Error(`Failed to send email: ${JSON.stringify(emailError)}`)
     }
 
     return new Response(
-      JSON.stringify({ message: "Envoi en cours" }),
+      JSON.stringify({ message: "Email envoyé avec succès" }),
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
