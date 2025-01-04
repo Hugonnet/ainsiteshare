@@ -9,12 +9,18 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
   const chunksRef = useRef<Blob[]>([]);
 
   const startRecording = async (e: React.MouseEvent) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
     
     try {
       console.log("Requesting audio permissions...");
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
         video: false
       });
       
@@ -51,7 +57,10 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
           setHasRecording(true);
           chunksRef.current = [];
 
-          stream.getTracks().forEach(track => track.stop());
+          // Arrêt propre des pistes audio
+          if (stream && stream.getTracks) {
+            stream.getTracks().forEach(track => track.stop());
+          }
         } catch (error) {
           console.error('Error processing recording:', error);
           toast({
@@ -59,6 +68,8 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
             description: "Erreur lors du traitement de l'enregistrement",
             variant: "destructive",
           });
+        } finally {
+          setIsRecording(false);
         }
       };
 
@@ -70,6 +81,7 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
       });
     } catch (error) {
       console.error('Error accessing microphone:', error);
+      setIsRecording(false);
       toast({
         title: "Erreur",
         description: "Impossible d'accéder au microphone. Vérifiez les permissions.",
@@ -79,18 +91,20 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
   };
 
   const stopRecording = (e: React.MouseEvent) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
     
     if (mediaRecorderRef.current && isRecording) {
       try {
         mediaRecorderRef.current.stop();
-        setIsRecording(false);
         toast({
           title: "Succès",
           description: "Enregistrement terminé",
         });
       } catch (error) {
         console.error('Error stopping recording:', error);
+        setIsRecording(false);
         toast({
           title: "Erreur",
           description: "Erreur lors de l'arrêt de l'enregistrement",
