@@ -18,9 +18,8 @@ export const PhotoButtons = ({ onFileSelect, onCameraClick, isPreparingCamera }:
           <Button 
             onClick={onCameraClick}
             type="button"
-            variant="secondary"
-            disabled={isPreparingCamera}
             className="w-full"
+            disabled={isPreparingCamera}
           >
             <Camera className="mr-2" />
             {isPreparingCamera ? "Préparation..." : "Prendre une photo"}
@@ -31,7 +30,7 @@ export const PhotoButtons = ({ onFileSelect, onCameraClick, isPreparingCamera }:
       <Button 
         onClick={onFileSelect}
         type="button"
-        className="w-full file-upload-button"
+        className="w-full"
       >
         <Upload className="mr-2" />
         Choisir des photos
