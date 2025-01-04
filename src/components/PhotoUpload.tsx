@@ -14,6 +14,8 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
   const isMobile = useIsMobile();
+  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const [isPreparingCamera, setIsPreparingCamera] = useState(false);
 
   const updatePreviews = (files: File[]) => {
     const newPreviews = files.map(file => URL.createObjectURL(file));
@@ -28,32 +30,67 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
     handleFiles(files);
   };
 
-  const handleCameraCapture = async () => {
+  const prepareCamera = async () => {
     try {
+      setIsPreparingCamera(true);
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: { exact: "environment" } 
         } 
       });
+      setVideoStream(stream);
       const video = document.createElement('video');
       video.srcObject = stream;
-      await video.play();
-
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d')?.drawImage(video, 0, 0);
-
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
-          handleFiles([file]);
-        }
-        stream.getTracks().forEach(track => track.stop());
-      }, 'image/jpeg');
+      video.style.position = 'fixed';
+      video.style.top = '0';
+      video.style.left = '0';
+      video.style.width = '100%';
+      video.style.height = '100%';
+      video.style.objectFit = 'cover';
+      video.style.zIndex = '9999';
+      document.body.appendChild(video);
+      
+      // Ajouter un bouton pour prendre la photo
+      const captureButton = document.createElement('button');
+      captureButton.innerText = 'Prendre la photo';
+      captureButton.style.position = 'fixed';
+      captureButton.style.bottom = '20px';
+      captureButton.style.left = '50%';
+      captureButton.style.transform = 'translateX(-50%)';
+      captureButton.style.zIndex = '10000';
+      captureButton.style.padding = '10px 20px';
+      captureButton.style.backgroundColor = '#2563eb';
+      captureButton.style.color = 'white';
+      captureButton.style.borderRadius = '8px';
+      captureButton.style.border = 'none';
+      
+      captureButton.onclick = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d')?.drawImage(video, 0, 0);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+            handleFiles([file]);
+          }
+          // Nettoyer
+          document.body.removeChild(video);
+          document.body.removeChild(captureButton);
+          stream.getTracks().forEach(track => track.stop());
+          setVideoStream(null);
+          setIsPreparingCamera(false);
+        }, 'image/jpeg');
+      };
+      
+      document.body.appendChild(captureButton);
+      video.play();
+      
     } catch (error) {
       console.error('Error accessing camera:', error);
       toast.error("Impossible d'accéder à la caméra");
+      setIsPreparingCamera(false);
     }
   };
 
@@ -115,9 +152,11 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
         onDrop={handleDrop}
       >
         <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-        <h3 className="text-xl font-semibold mb-2">
-          Déposez vos photos ici
-        </h3>
+        {!isMobile && (
+          <h3 className="text-xl font-semibold mb-2">
+            Déposez vos photos ici
+          </h3>
+        )}
         <p className="text-muted-foreground mb-4">
           ou
         </p>
@@ -140,12 +179,13 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
           </Button>
           {isMobile && (
             <Button 
-              onClick={handleCameraCapture}
+              onClick={prepareCamera}
               type="button"
               variant="secondary"
+              disabled={isPreparingCamera}
             >
               <Camera className="mr-2" />
-              Prendre une photo
+              {isPreparingCamera ? "Préparation..." : "Prendre une photo"}
             </Button>
           )}
         </div>

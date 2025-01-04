@@ -1,147 +1,100 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import JSZip from "https://esm.sh/jszip@3.10.1";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { Resend } from 'https://esm.sh/@resend/node'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
+
+interface ProjectData {
+  companyName: string;
+  city: string;
+  department: string;
+  description: string;
+  photos: string[];
+}
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { companyName, city, department, description, photoPaths } = await req.json();
-
-    if (!Array.isArray(photoPaths) || photoPaths.length === 0) {
-      throw new Error('No photos provided');
-    }
-
-    console.log('Initializing Supabase client...');
-    const supabaseAdmin = createClient(
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    )
 
-    if (!supabaseAdmin) {
-      throw new Error('Failed to initialize Supabase client');
-    }
-
-    console.log('Creating ZIP file...');
-    const zip = new JSZip();
-    const folder = zip.folder("photos");
-
-    if (!folder) {
-      throw new Error("Failed to create folder in ZIP");
-    }
-
-    // Download and add each photo to the ZIP
-    for (const path of photoPaths) {
-      try {
-        if (!path) {
-          console.warn('Skipping empty path');
-          continue;
-        }
-
-        console.log('Processing image:', path);
-        const { data, error } = await supabaseAdmin.storage
-          .from('project_photos')
-          .download(path);
-
-        if (error) {
-          console.error('Error downloading image:', path, error);
-          continue;
-        }
-
-        if (!data) {
-          console.error('No data received for image:', path);
-          continue;
-        }
-
-        const arrayBuffer = await data.arrayBuffer();
-        const fileName = path.split('/').pop() || 'photo.jpg';
-        
-        console.log(`Adding ${fileName} to ZIP, size: ${arrayBuffer.byteLength} bytes`);
-        folder.file(fileName, arrayBuffer);
-      } catch (error) {
-        console.error('Error processing image:', path, error);
-      }
-    }
-
-    console.log('Generating ZIP file...');
-    const zipContent = await zip.generateAsync({
-      type: "base64",
-      compression: "DEFLATE",
-      compressionOptions: { level: 6 }
-    });
+    const { data: projectData } = await req.json() as { data: ProjectData }
     
-    if (!zipContent) {
-      throw new Error('Failed to generate ZIP content');
+    const { companyName, city, department, description, photos } = projectData
+
+    const photosList = photos.map((photo, index) => `
+      <div style="margin-bottom: 20px;">
+        <img src="${photo}" alt="Photo ${index + 1}" style="max-width: 100%; height: auto; border-radius: 8px;">
+      </div>
+    `).join('')
+
+    const { error: emailError } = await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: 'ainsitenet@gmail.com',
+      subject: `Nouvelle réalisation de ${companyName} à ${city}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #1a1a1a;">Nouvelle réalisation</h1>
+          
+          <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="color: #2563eb; margin-top: 0;">${companyName}</h2>
+            <p style="margin: 10px 0;"><strong>Ville:</strong> ${city}</p>
+            <p style="margin: 10px 0;"><strong>Département:</strong> ${department}</p>
+            <p style="margin: 10px 0;"><strong>Description:</strong></p>
+            <p style="margin: 10px 0;">${description}</p>
+          </div>
+
+          <div style="margin-top: 30px;">
+            <h3 style="color: #1a1a1a;">Photos de la réalisation:</h3>
+            ${photosList}
+          </div>
+        </div>
+      `,
+    })
+
+    if (emailError) {
+      throw new Error(`Failed to send email: ${JSON.stringify(emailError)}`)
     }
 
-    console.log('ZIP file generated, size:', zipContent.length);
+    const { error: dbError } = await supabaseClient
+      .from('project_submissions')
+      .insert([
+        {
+          company_name: companyName,
+          city,
+          department,
+          description,
+          photo_paths: photos,
+        },
+      ])
 
-    const photoUrls = photoPaths.map(path => {
-      if (!path) return '';
-      const { data: { publicUrl } } = supabaseAdmin.storage
-        .from('project_photos')
-        .getPublicUrl(path);
-      return publicUrl;
-    }).filter(url => url);
-
-    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-    if (!RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY is not set');
+    if (dbError) {
+      throw new Error(`Database error: ${JSON.stringify(dbError)}`)
     }
 
-    console.log('Sending email...');
-    const emailResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
+    return new Response(
+      JSON.stringify({ message: "Envoi en cours" }),
+      { 
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
       },
-      body: JSON.stringify({
-        from: 'Ainsite <onboarding@resend.dev>',
-        to: ['ainsitenet@gmail.com'],
-        subject: `Nouvelle réalisation de ${companyName} à ${city}`,
-        html: `
-          <h1>Nouvelle réalisation</h1>
-          <p><strong>Entreprise :</strong> ${companyName}</p>
-          <p><strong>Ville :</strong> ${city}</p>
-          <p><strong>Département :</strong> ${department}</p>
-          <p><strong>Description :</strong> ${description}</p>
-          <h2>Photos</h2>
-          ${photoUrls.map(url => `<img src="${url}" style="max-width: 300px; margin: 10px 0;" />`).join('')}
-        `,
-        attachments: [{
-          filename: 'photos.zip',
-          content: zipContent,
-          content_type: 'application/zip',
-        }],
-      }),
-    });
-
-    if (!emailResponse.ok) {
-      const error = await emailResponse.text();
-      throw new Error(`Failed to send email: ${error}`);
-    }
-
-    console.log('Email sent successfully');
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    )
   } catch (error) {
-    console.error('Error in send-project-email function:', error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'An unknown error occurred',
-      stack: error instanceof Error ? error.stack : undefined
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: `Error in send-project-email function: ${error.message}` }),
+      { 
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      },
+    )
   }
-});
+})
