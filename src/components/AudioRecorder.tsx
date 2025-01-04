@@ -16,8 +16,28 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      // Configuration spécifique pour une meilleure compatibilité mobile
+      const constraints = {
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      // Utilisation de différents types MIME selon la compatibilité du navigateur
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : MediaRecorder.isTypeSupported('audio/mp4')
+        ? 'audio/mp4'
+        : 'audio/ogg';
+
+      mediaRecorderRef.current = new MediaRecorder(stream, {
+        mimeType,
+        audioBitsPerSecond: 128000
+      });
       
       mediaRecorderRef.current.ondataavailable = (e) => {
         if (e.data.size > 0) {
@@ -26,27 +46,37 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
       };
 
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
         onAudioRecorded(audioBlob);
         setHasRecording(true);
         chunksRef.current = [];
+
+        // S'assurer que tous les tracks sont bien arrêtés
+        if (mediaRecorderRef.current?.stream) {
+          mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        }
       };
 
-      mediaRecorderRef.current.start();
+      // Démarrer l'enregistrement avec un intervalle plus court pour les chunks
+      mediaRecorderRef.current.start(100);
       setIsRecording(true);
       toast.info("Enregistrement en cours...");
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      toast.error("Impossible d'accéder au microphone");
+      toast.error("Impossible d'accéder au microphone. Vérifiez les permissions.");
     }
   };
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-      setIsRecording(false);
-      toast.success("Enregistrement terminé");
+      try {
+        mediaRecorderRef.current.stop();
+        setIsRecording(false);
+        toast.success("Enregistrement terminé");
+      } catch (error) {
+        console.error('Error stopping recording:', error);
+        toast.error("Erreur lors de l'arrêt de l'enregistrement");
+      }
     }
   };
 
