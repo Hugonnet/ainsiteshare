@@ -100,6 +100,7 @@ serve(async (req) => {
     });
 
     if (emailError) {
+      console.error('Email error:', emailError);
       throw new Error(`Failed to send email: ${JSON.stringify(emailError)}`)
     }
 
