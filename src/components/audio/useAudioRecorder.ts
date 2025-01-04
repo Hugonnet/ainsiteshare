@@ -11,27 +11,32 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
   const startRecording = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      const constraints = {
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+          channelCount: 1,
+          sampleRate: 44100
         }
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      });
       
-      let mimeType = 'audio/webm';
-      if (!MediaRecorder.isTypeSupported('audio/webm')) {
-        if (MediaRecorder.isTypeSupported('audio/mp4')) {
-          mimeType = 'audio/mp4';
-        } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-          mimeType = 'audio/ogg';
-        }
+      // Détecter le meilleur format audio supporté
+      const mimeTypes = [
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg',
+        'audio/wav'
+      ];
+      
+      let selectedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
+      
+      if (!selectedMimeType) {
+        throw new Error("Aucun format audio supporté n'a été trouvé");
       }
 
       mediaRecorderRef.current = new MediaRecorder(stream, {
-        mimeType,
+        mimeType: selectedMimeType,
         audioBitsPerSecond: 128000
       });
       
@@ -43,7 +48,7 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
 
       mediaRecorderRef.current.onstop = () => {
         try {
-          const audioBlob = new Blob(chunksRef.current, { type: mimeType });
+          const audioBlob = new Blob(chunksRef.current, { type: selectedMimeType });
           onAudioRecorded(audioBlob);
           setHasRecording(true);
           chunksRef.current = [];
