@@ -36,7 +36,7 @@ export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionF
           <FormControl>
             <Textarea
               placeholder="Décrivez brièvement votre prestation en 1 phrase ..."
-              className="resize-none text-lg"
+              className="resize-none text-lg placeholder:text-muted-foreground/50"
               {...field}
             />
           </FormControl>

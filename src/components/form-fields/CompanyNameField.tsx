@@ -17,7 +17,11 @@ export const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
         <FormItem>
           <FormLabel className="text-lg">Nom de l'entreprise</FormLabel>
           <FormControl>
-            <Input placeholder="Votre entreprise" className="text-lg" {...field} />
+            <Input 
+              placeholder="Votre entreprise" 
+              className="text-lg placeholder:text-muted-foreground/50" 
+              {...field} 
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

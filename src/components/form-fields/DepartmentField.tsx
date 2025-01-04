@@ -17,7 +17,12 @@ export const DepartmentField = ({ form }: DepartmentFieldProps) => {
         <FormItem>
           <FormLabel className="text-lg">Département concerné</FormLabel>
           <FormControl>
-            <Input placeholder="Exemple : 01" className="text-lg" maxLength={3} {...field} />
+            <Input 
+              placeholder="Exemple : 01" 
+              className="text-lg placeholder:text-muted-foreground/50" 
+              maxLength={3} 
+              {...field} 
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
