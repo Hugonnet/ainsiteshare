@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface AudioRecorderProps {
   onAudioRecorded: (blob: Blob | null) => void;
-  onAudioDeleted?: () => void;  // Ajout de la nouvelle prop optionnelle
+  onAudioDeleted?: () => void;
 }
 
 export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorderProps) => {
@@ -126,7 +126,7 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
             type="button"
           >
             <Mic className="h-4 w-4" />
-            Enregiter
+            Enregistrer un message vocal
           </Button>
         )}
         

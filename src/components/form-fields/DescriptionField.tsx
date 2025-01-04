@@ -32,7 +32,6 @@ export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionF
           <AudioRecorder 
             onAudioRecorded={(blob) => {
               setAudioBlob(blob);
-              // Si un enregistrement audio est présent, on met une valeur par défaut dans la description
               if (!field.value) {
                 form.setValue('description', 'Description audio enregistrée');
               }
@@ -41,7 +40,7 @@ export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionF
           />
           <FormControl>
             <Textarea
-              placeholder={audioBlob ? "" : "Décrivez brièvement votre prestation en 1 phrase ..."}
+              placeholder={audioBlob ? "" : "Ou bien décrivez votre prestation en 1 phrase ..."}
               className="resize-none text-lg placeholder:text-muted-foreground/50"
               {...field}
             />
