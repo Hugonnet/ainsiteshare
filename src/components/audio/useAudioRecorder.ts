@@ -7,13 +7,25 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
   const [hasRecording, setHasRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startRecording = async (e: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
     }
-    
+
+    // Si un enregistrement est déjà en cours, on l'arrête
+    if (isRecording) {
+      await stopRecording(e);
+      return;
+    }
+
     try {
+      // Nettoyage des anciennes pistes audio si elles existent
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+
       console.log("Requesting audio permissions...");
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -24,26 +36,13 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
         video: false
       });
       
+      streamRef.current = stream;
       console.log("Audio permissions granted, stream created");
-      
-      const mimeTypes = ['audio/webm', 'audio/mp4', 'audio/ogg'];
-      let selectedMimeType = null;
-      
-      for (const type of mimeTypes) {
-        if (MediaRecorder.isTypeSupported(type)) {
-          selectedMimeType = type;
-          console.log(`Found supported audio format: ${type}`);
-          break;
-        }
-      }
-      
-      if (!selectedMimeType) {
-        throw new Error("Aucun format audio supporté n'a été trouvé");
-      }
 
       const recorder = new MediaRecorder(stream);
       mediaRecorderRef.current = recorder;
-      
+      chunksRef.current = [];
+
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           chunksRef.current.push(e.data);
@@ -52,15 +51,20 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
 
       recorder.onstop = () => {
         try {
-          const audioBlob = new Blob(chunksRef.current, { type: selectedMimeType });
+          const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
           onAudioRecorded(audioBlob);
           setHasRecording(true);
-          chunksRef.current = [];
-
-          // Arrêt propre des pistes audio
-          if (stream && stream.getTracks) {
-            stream.getTracks().forEach(track => track.stop());
+          
+          // Nettoyage
+          if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
           }
+          
+          toast({
+            title: "Succès",
+            description: "Enregistrement terminé",
+          });
         } catch (error) {
           console.error('Error processing recording:', error);
           toast({
@@ -90,27 +94,30 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
     }
   };
 
-  const stopRecording = (e: React.MouseEvent) => {
+  const stopRecording = async (e: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
     }
     
-    if (mediaRecorderRef.current && isRecording) {
-      try {
+    try {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
-        toast({
-          title: "Succès",
-          description: "Enregistrement terminé",
-        });
-      } catch (error) {
-        console.error('Error stopping recording:', error);
-        setIsRecording(false);
-        toast({
-          title: "Erreur",
-          description: "Erreur lors de l'arrêt de l'enregistrement",
-          variant: "destructive",
-        });
       }
+      
+      // Nettoyage immédiat des pistes
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+    } catch (error) {
+      console.error('Error stopping recording:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'arrêt de l'enregistrement",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRecording(false);
     }
   };
 
