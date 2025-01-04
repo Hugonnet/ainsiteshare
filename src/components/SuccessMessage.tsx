@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 interface SuccessMessageProps {
   company: string;
@@ -6,6 +7,13 @@ interface SuccessMessageProps {
 }
 
 export const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
+  useEffect(() => {
+    const audio = new Audio("/success.mp3");
+    audio.play().catch(error => {
+      console.error("Error playing success sound:", error);
+    });
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -21,7 +29,7 @@ export const SuccessMessage = ({ company, city }: SuccessMessageProps) => {
         initial={{ y: 20 }}
         animate={{ y: 0 }}
         transition={{ delay: 0.5 }}
-        className="text-8xl font-bold mb-12 text-white text-center"
+        className="text-6xl font-bold mb-8 text-white text-center"
       >
         Projet soumis avec succès
       </motion.h1>
