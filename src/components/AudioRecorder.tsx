@@ -1,22 +1,18 @@
-import { useState, useRef } from 'react';
-import { Button } from './ui/button';
-import { Mic, Square } from 'lucide-react';
-import { toast } from 'sonner';
+import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Mic, Square, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
-interface AudioRecorderProps {
-  onAudioRecorded: (audioBlob: Blob) => void;
-  onAudioDeleted: () => void;
-}
-
-export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorderProps) => {
+export const AudioRecorder = ({ onAudioRecorded }: { onAudioRecorded: (blob: Blob | null) => void }) => {
+  const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecording, setHasRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
-  const startRecording = async () => {
+  const startRecording = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default form submission
     try {
-      // Configuration spécifique pour une meilleure compatibilité mobile
       const constraints = {
         audio: {
           echoCancellation: true,
@@ -27,12 +23,15 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       
-      // Utilisation de différents types MIME selon la compatibilité du navigateur
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm')
-        ? 'audio/webm'
-        : MediaRecorder.isTypeSupported('audio/mp4')
-        ? 'audio/mp4'
-        : 'audio/ogg';
+      // Déterminer le format audio supporté
+      let mimeType = 'audio/webm';
+      if (!MediaRecorder.isTypeSupported('audio/webm')) {
+        if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+          mimeType = 'audio/ogg';
+        }
+      }
 
       mediaRecorderRef.current = new MediaRecorder(stream, {
         mimeType,
@@ -46,75 +45,114 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
       };
 
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
-        onAudioRecorded(audioBlob);
-        setHasRecording(true);
-        chunksRef.current = [];
+        try {
+          const audioBlob = new Blob(chunksRef.current, { type: mimeType });
+          onAudioRecorded(audioBlob);
+          setHasRecording(true);
+          chunksRef.current = [];
 
-        // S'assurer que tous les tracks sont bien arrêtés
-        if (mediaRecorderRef.current?.stream) {
-          mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+          // Arrêter proprement tous les tracks
+          if (mediaRecorderRef.current?.stream) {
+            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+          }
+        } catch (error) {
+          console.error('Error processing recording:', error);
+          toast({
+            title: "Erreur",
+            description: "Erreur lors du traitement de l'enregistrement",
+            variant: "destructive",
+          });
         }
       };
 
-      // Démarrer l'enregistrement avec un intervalle plus court pour les chunks
       mediaRecorderRef.current.start(100);
       setIsRecording(true);
-      toast.info("Enregistrement en cours...");
+      toast({
+        title: "Enregistrement",
+        description: "Enregistrement en cours...",
+      });
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      toast.error("Impossible d'accéder au microphone. Vérifiez les permissions.");
+      toast({
+        title: "Erreur",
+        description: "Impossible d'accéder au microphone. Vérifiez les permissions.",
+        variant: "destructive",
+      });
     }
   };
 
-  const stopRecording = () => {
+  const stopRecording = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default form submission
     if (mediaRecorderRef.current && isRecording) {
       try {
         mediaRecorderRef.current.stop();
         setIsRecording(false);
-        toast.success("Enregistrement terminé");
+        toast({
+          title: "Succès",
+          description: "Enregistrement terminé",
+        });
       } catch (error) {
         console.error('Error stopping recording:', error);
-        toast.error("Erreur lors de l'arrêt de l'enregistrement");
+        toast({
+          title: "Erreur",
+          description: "Erreur lors de l'arrêt de l'enregistrement",
+          variant: "destructive",
+        });
       }
     }
   };
 
-  const deleteRecording = () => {
+  const deleteRecording = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default form submission
     setHasRecording(false);
-    onAudioDeleted();
-    toast.success("Enregistrement supprimé");
+    onAudioRecorded(null);
+    toast({
+      title: "Suppression",
+      description: "Enregistrement supprimé",
+    });
   };
 
   return (
-    <div className="flex gap-2 justify-start">
-      {!hasRecording ? (
-        <Button
-          type="button"
-          className="w-full h-12 bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 text-white font-semibold rounded-lg"
-          onClick={isRecording ? stopRecording : startRecording}
-        >
-          {isRecording ? (
-            <>
-              <Square className="h-5 w-5 mr-2" />
-              Arrêter l'enregistrement
-            </>
-          ) : (
-            <>
-              <Mic className="h-5 w-5 mr-2" />
-              Enregistrer un message audio
-            </>
-          )}
-        </Button>
-      ) : (
-        <Button
-          type="button"
-          className="w-full h-12 bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 text-white font-semibold rounded-lg"
-          onClick={deleteRecording}
-        >
-          <Square className="h-5 w-5 mr-2" />
-          Supprimer l'enregistrement
-        </Button>
+    <div className="flex flex-col gap-4">
+      <div className="flex gap-2">
+        {!isRecording && !hasRecording && (
+          <Button
+            onClick={startRecording}
+            variant="outline"
+            type="button"
+          >
+            <Mic className="h-4 w-4" />
+            Enregistrer
+          </Button>
+        )}
+        
+        {isRecording && (
+          <Button
+            onClick={stopRecording}
+            variant="destructive"
+            type="button"
+          >
+            <Square className="h-4 w-4" />
+            Arrêter
+          </Button>
+        )}
+        
+        {hasRecording && !isRecording && (
+          <Button
+            onClick={deleteRecording}
+            variant="outline"
+            type="button"
+          >
+            <Trash2 className="h-4 w-4" />
+            Supprimer
+          </Button>
+        )}
+      </div>
+      
+      {hasRecording && (
+        <p className="text-sm text-muted-foreground">
+          ✓ Enregistrement audio ajouté
+        </p>
       )}
     </div>
   );
