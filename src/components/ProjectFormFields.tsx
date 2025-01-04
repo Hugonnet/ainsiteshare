@@ -101,21 +101,22 @@ export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: Pro
         name="city"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-lg">Ville de la réalisation</FormLabel>
-            <div className="flex gap-2">
-              <FormControl>
-                <Input placeholder="Ville concernée" className="text-lg" {...field} />
-              </FormControl>
+            <div className="flex justify-between items-center">
+              <FormLabel className="text-lg">Ville de la réalisation</FormLabel>
               <Button
                 type="button"
                 variant="outline"
                 onClick={getLocation}
                 disabled={isLocating}
+                className="text-sm"
               >
-                <MapPin className="h-4 w-4 text-red-500" />
-                <span className="sr-only">Me localiser</span>
+                <MapPin className="h-4 w-4 text-red-500 mr-2" />
+                Me localiser
               </Button>
             </div>
+            <FormControl>
+              <Input placeholder="Ville concernée" className="text-lg" {...field} />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}
