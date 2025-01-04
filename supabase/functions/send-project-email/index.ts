@@ -98,10 +98,11 @@ serve(async (req) => {
       audioHtml = `
         <div style="margin-top: 20px; margin-bottom: 20px;">
           <h3 style="color: #1a1a1a;">Description audio:</h3>
-          <audio controls>
-            <source src="${audioUrl.publicUrl}" type="audio/webm">
-            Your browser does not support the audio element.
-          </audio>
+          <p>
+            <a href="${audioUrl.publicUrl}" style="color: #2563eb; text-decoration: underline;" target="_blank">
+              Télécharger l'enregistrement audio
+            </a>
+          </p>
         </div>
       `;
     }
