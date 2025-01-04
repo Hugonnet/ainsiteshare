@@ -53,11 +53,8 @@ serve(async (req) => {
       zip.addFile(`photo_${i + 1}.jpg`, uint8Array);
     }
 
-    // Generate the zip file as a Uint8Array
-    const zipContent = await zip.generateAsync({ type: "uint8array" });
-
-    // Convert Uint8Array to Buffer for email attachment
-    const buffer = Buffer.from(zipContent);
+    // Generate the zip file as a base64 string
+    const zipContent = await zip.generateAsync({ type: "base64" });
 
     // Get public URLs for the photos for email display
     const photoUrls = await Promise.all(
@@ -100,7 +97,8 @@ serve(async (req) => {
       attachments: [
         {
           filename: `photos_${companyName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.zip`,
-          content: buffer,
+          content: zipContent,
+          encoding: 'base64',
         },
       ],
     });
