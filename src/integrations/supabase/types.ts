@@ -26,6 +26,7 @@ export type Database = {
       }
       project_submissions: {
         Row: {
+          audio_path: string | null
           city: string
           company_name: string
           created_at: string
@@ -35,6 +36,7 @@ export type Database = {
           photo_paths: string[] | null
         }
         Insert: {
+          audio_path?: string | null
           city: string
           company_name: string
           created_at?: string
@@ -44,6 +46,7 @@ export type Database = {
           photo_paths?: string[] | null
         }
         Update: {
+          audio_path?: string | null
           city?: string
           company_name?: string
           created_at?: string

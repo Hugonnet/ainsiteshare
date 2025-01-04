@@ -3,8 +3,17 @@ import { ProjectForm } from "@/components/ProjectForm";
 import { Fireworks } from "@/components/Fireworks";
 import { SuccessMessage } from "@/components/SuccessMessage";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const Index = () => {
+  const [submitted, setSubmitted] = useState(false);
+  const [submissionData, setSubmissionData] = useState<{ company: string; city: string } | null>(null);
+
+  const handleSubmissionSuccess = (company: string, city: string) => {
+    setSubmissionData({ company, city });
+    setSubmitted(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -23,11 +32,14 @@ const Index = () => {
           </p>
         </motion.div>
         
-        <ProjectForm />
+        <ProjectForm onSubmissionSuccess={handleSubmissionSuccess} />
         
-        {/* Uncomment when upload is successful */}
-        {/* <Fireworks />
-        <SuccessMessage company="Entreprise" city="Paris" /> */}
+        {submitted && submissionData && (
+          <>
+            <Fireworks />
+            <SuccessMessage company={submissionData.company} city={submissionData.city} />
+          </>
+        )}
       </main>
     </div>
   );

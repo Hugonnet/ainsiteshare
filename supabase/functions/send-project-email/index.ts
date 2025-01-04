@@ -14,6 +14,7 @@ interface ProjectData {
   department: string;
   description: string;
   photoPaths: string[];
+  audioPath?: string | null;
 }
 
 serve(async (req) => {
@@ -28,7 +29,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     )
 
-    const { companyName, city, department, description, photoPaths } = await req.json()
+    const { companyName, city, department, description, photoPaths, audioPath } = await req.json()
     
     // Create a new zip file
     const zip = new JSZip();
@@ -53,6 +54,21 @@ serve(async (req) => {
       zip.addFile(`photo_${i + 1}.jpg`, uint8Array);
     }
 
+    // If there's an audio file, add it to the zip
+    if (audioPath) {
+      const { data: audioData, error: audioError } = await supabaseClient.storage
+        .from('project_photos')
+        .download(audioPath);
+
+      if (audioError) {
+        console.error(`Error downloading audio ${audioPath}:`, audioError);
+      } else {
+        const arrayBuffer = await audioData.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        zip.addFile('description_audio.webm', uint8Array);
+      }
+    }
+
     // Generate the zip file as a base64 string
     const zipContent = await zip.generateAsync({ type: "base64" });
 
@@ -72,6 +88,24 @@ serve(async (req) => {
       </div>
     `).join('')
 
+    // Get audio URL if it exists
+    let audioHtml = '';
+    if (audioPath) {
+      const { data: audioUrl } = await supabaseClient.storage
+        .from('project_photos')
+        .getPublicUrl(audioPath);
+      
+      audioHtml = `
+        <div style="margin-top: 20px; margin-bottom: 20px;">
+          <h3 style="color: #1a1a1a;">Description audio:</h3>
+          <audio controls>
+            <source src="${audioUrl.publicUrl}" type="audio/webm">
+            Votre navigateur ne supporte pas l'élément audio.
+          </audio>
+        </div>
+      `;
+    }
+
     const { error: emailError } = await resend.emails.send({
       from: 'Resend <onboarding@resend.dev>',
       to: ['ainsitenet@gmail.com'],
@@ -87,6 +121,8 @@ serve(async (req) => {
             <p style="margin: 10px 0;"><strong>Description:</strong></p>
             <p style="margin: 10px 0;">${description}</p>
           </div>
+
+          ${audioHtml}
 
           <div style="margin-top: 30px;">
             <h3 style="color: #1a1a1a;">Photos de la réalisation:</h3>
