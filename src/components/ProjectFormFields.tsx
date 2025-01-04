@@ -5,7 +5,6 @@ import { CompanyNameField } from "./form-fields/CompanyNameField";
 import { CityField } from "./form-fields/CityField";
 import { DepartmentField } from "./form-fields/DepartmentField";
 import { DescriptionField } from "./form-fields/DescriptionField";
-import { AudioRecorder } from "./AudioRecorder";
 
 export const formSchema = z.object({
   companyName: z.string().min(2, {
@@ -46,13 +45,11 @@ export const ProjectFormFields = ({
       <CompanyNameField form={form} />
       <CityField form={form} />
       <DepartmentField form={form} />
-      <div className="space-y-4">
-        <DescriptionField form={form} />
-        <AudioRecorder 
-          onAudioRecorded={(blob) => setAudioBlob(blob)}
-          onAudioDeleted={() => setAudioBlob(null)}
-        />
-      </div>
+      <DescriptionField 
+        form={form} 
+        audioBlob={audioBlob}
+        setAudioBlob={setAudioBlob}
+      />
       <div className="flex justify-center mt-8">
         <PhotoUpload 
           selectedFiles={selectedFiles}

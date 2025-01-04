@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Button } from './ui/button';
-import { Mic, Square, Loader2 } from 'lucide-react';
+import { Mic, Square } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AudioRecorderProps {
@@ -61,18 +61,17 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
       {!hasRecording ? (
         <Button
           type="button"
-          variant="outline"
+          className="w-full h-12 bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 text-white font-semibold rounded-lg"
           onClick={isRecording ? stopRecording : startRecording}
-          className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20"
         >
           {isRecording ? (
             <>
-              <Square className="h-4 w-4 mr-2" />
+              <Square className="h-5 w-5 mr-2" />
               Arrêter l'enregistrement
             </>
           ) : (
             <>
-              <Mic className="h-4 w-4 mr-2" />
+              <Mic className="h-5 w-5 mr-2" />
               Enregistrer un message audio
             </>
           )}
@@ -80,11 +79,10 @@ export const AudioRecorder = ({ onAudioRecorded, onAudioDeleted }: AudioRecorder
       ) : (
         <Button
           type="button"
-          variant="outline"
+          className="w-full h-12 bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 text-white font-semibold rounded-lg"
           onClick={deleteRecording}
-          className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20"
         >
-          <Square className="h-4 w-4 mr-2" />
+          <Square className="h-5 w-5 mr-2" />
           Supprimer l'enregistrement
         </Button>
       )}

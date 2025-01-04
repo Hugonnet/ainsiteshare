@@ -4,14 +4,17 @@ import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { formSchema } from "../ProjectFormFields";
 import { useEffect } from "react";
+import { AudioRecorder } from "../AudioRecorder";
 
 interface DescriptionFieldProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
+  audioBlob: Blob | null;
+  setAudioBlob: (blob: Blob | null) => void;
 }
 
 const STORAGE_KEY = 'saved_description';
 
-export const DescriptionField = ({ form }: DescriptionFieldProps) => {
+export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionFieldProps) => {
   useEffect(() => {
     const savedDescription = localStorage.getItem(STORAGE_KEY);
     if (savedDescription) {
@@ -24,8 +27,12 @@ export const DescriptionField = ({ form }: DescriptionFieldProps) => {
       control={form.control}
       name="description"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="space-y-4">
           <FormLabel className="text-lg">Type de prestation</FormLabel>
+          <AudioRecorder 
+            onAudioRecorded={(blob) => setAudioBlob(blob)}
+            onAudioDeleted={() => setAudioBlob(null)}
+          />
           <FormControl>
             <Textarea
               placeholder="Décrivez brièvement votre prestation en 1 phrase ..."
