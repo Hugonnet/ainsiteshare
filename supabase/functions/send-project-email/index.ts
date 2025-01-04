@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { Resend } from "https://esm.sh/@resend/node";
 import JSZip from "https://esm.sh/jszip@3.10.1";
 
 const corsHeaders = {
@@ -16,7 +15,6 @@ serve(async (req) => {
   try {
     const { companyName, city, department, description, photoPaths } = await req.json();
 
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -44,7 +42,7 @@ serve(async (req) => {
         const fileName = path.split('/').pop() || 'photo.jpg';
         
         console.log(`Adding ${fileName} to ZIP, size: ${arrayBuffer.byteLength} bytes`);
-        folder.file(fileName, arrayBuffer);
+        folder?.file(fileName, arrayBuffer);
       } catch (error) {
         console.error('Error processing image:', path, error);
       }
@@ -52,13 +50,13 @@ serve(async (req) => {
 
     console.log('Generating ZIP file...');
     const zipContent = await zip.generateAsync({
-      type: "nodebuffer",
+      type: "uint8array",
       compression: "DEFLATE",
       compressionOptions: { level: 6 }
     });
     
     console.log('ZIP file generated, size:', zipContent.length);
-    const zipBase64 = btoa(String.fromCharCode(...new Uint8Array(zipContent)));
+    const zipBase64 = btoa(String.fromCharCode.apply(null, zipContent));
 
     const photoUrls = photoPaths.map(path => {
       const { data: { publicUrl } } = supabaseAdmin.storage
@@ -67,27 +65,35 @@ serve(async (req) => {
       return publicUrl;
     });
 
-    const { error } = await resend.emails.send({
-      from: 'contact@ainsite.fr',
-      to: ['contact@ainsite.fr'],
-      subject: `Nouvelle réalisation de ${companyName} à ${city}`,
-      html: `
-        <h1>Nouvelle réalisation</h1>
-        <p><strong>Entreprise :</strong> ${companyName}</p>
-        <p><strong>Ville :</strong> ${city}</p>
-        <p><strong>Département :</strong> ${department}</p>
-        <p><strong>Description :</strong> ${description}</p>
-        <h2>Photos</h2>
-        ${photoUrls.map(url => `<img src="${url}" style="max-width: 300px; margin: 10px 0;" />`).join('')}
-      `,
-      attachments: [{
-        filename: 'photos.zip',
-        content: zipBase64,
-      }],
+    const emailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
+      },
+      body: JSON.stringify({
+        from: 'contact@ainsite.fr',
+        to: ['contact@ainsite.fr'],
+        subject: `Nouvelle réalisation de ${companyName} à ${city}`,
+        html: `
+          <h1>Nouvelle réalisation</h1>
+          <p><strong>Entreprise :</strong> ${companyName}</p>
+          <p><strong>Ville :</strong> ${city}</p>
+          <p><strong>Département :</strong> ${department}</p>
+          <p><strong>Description :</strong> ${description}</p>
+          <h2>Photos</h2>
+          ${photoUrls.map(url => `<img src="${url}" style="max-width: 300px; margin: 10px 0;" />`).join('')}
+        `,
+        attachments: [{
+          filename: 'photos.zip',
+          content: zipBase64,
+        }],
+      }),
     });
 
-    if (error) {
-      throw error;
+    if (!emailResponse.ok) {
+      const error = await emailResponse.text();
+      throw new Error(`Failed to send email: ${error}`);
     }
 
     return new Response(JSON.stringify({ success: true }), {
