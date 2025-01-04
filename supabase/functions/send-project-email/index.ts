@@ -45,15 +45,19 @@ serve(async (req) => {
         continue;
       }
 
-      // Convert Blob to ArrayBuffer
+      // Convert Blob to ArrayBuffer and then to Uint8Array
       const arrayBuffer = await photoData.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
       
       // Add the photo to the zip with a numbered filename
-      zip.addFile(`photo_${i + 1}.jpg`, new Uint8Array(arrayBuffer));
+      zip.addFile(`photo_${i + 1}.jpg`, uint8Array);
     }
 
-    // Generate the zip file
+    // Generate the zip file as a Uint8Array
     const zipContent = await zip.generateAsync({ type: "uint8array" });
+
+    // Convert Uint8Array to Buffer for email attachment
+    const buffer = Buffer.from(zipContent);
 
     // Get public URLs for the photos for email display
     const photoUrls = await Promise.all(
@@ -96,7 +100,7 @@ serve(async (req) => {
       attachments: [
         {
           filename: `photos_${companyName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.zip`,
-          content: zipContent,
+          content: buffer,
         },
       ],
     });
