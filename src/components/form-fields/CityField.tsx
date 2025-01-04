@@ -64,7 +64,7 @@ export const CityField = ({ form }: CityFieldProps) => {
               className="bg-[#39FF14] hover:bg-[#32E512] text-black font-semibold h-8 w-fit mx-auto"
             >
               <MapPin className="h-4 w-4 mr-1" />
-              Localiser
+              Me localiser
             </Button>
             <FormControl>
               <Input placeholder="Ville concernée" className="text-lg" {...field} />
