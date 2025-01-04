@@ -11,50 +11,58 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
   const startRecording = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
+      console.log("Requesting audio permissions...");
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-          channelCount: 1,
-          sampleRate: 44100
-        }
+        audio: true // Simplified constraints
       });
       
-      // Détecter le meilleur format audio supporté
-      const mimeTypes = [
-        'audio/webm',
-        'audio/mp4',
-        'audio/ogg',
-        'audio/wav'
-      ];
+      console.log("Audio permissions granted, stream created");
       
-      let selectedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
+      // Test available formats
+      const mimeTypes = ['audio/webm', 'audio/mp4', 'audio/ogg'];
+      let selectedMimeType = null;
+      
+      for (const type of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          selectedMimeType = type;
+          console.log(`Found supported audio format: ${type}`);
+          break;
+        } else {
+          console.log(`Format not supported: ${type}`);
+        }
+      }
       
       if (!selectedMimeType) {
+        console.error("No supported audio format found");
         throw new Error("Aucun format audio supporté n'a été trouvé");
       }
 
+      console.log("Creating MediaRecorder...");
       mediaRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: selectedMimeType,
-        audioBitsPerSecond: 128000
+        mimeType: selectedMimeType
       });
       
       mediaRecorderRef.current.ondataavailable = (e) => {
+        console.log("Data available event received");
         if (e.data.size > 0) {
           chunksRef.current.push(e.data);
         }
       };
 
       mediaRecorderRef.current.onstop = () => {
+        console.log("Recording stopped");
         try {
           const audioBlob = new Blob(chunksRef.current, { type: selectedMimeType });
+          console.log(`Audio blob created, size: ${audioBlob.size} bytes`);
           onAudioRecorded(audioBlob);
           setHasRecording(true);
           chunksRef.current = [];
 
           if (mediaRecorderRef.current?.stream) {
-            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+            mediaRecorderRef.current.stream.getTracks().forEach(track => {
+              track.stop();
+              console.log("Audio track stopped");
+            });
           }
         } catch (error) {
           console.error('Error processing recording:', error);
@@ -67,6 +75,7 @@ export const useAudioRecorder = (onAudioRecorded: (blob: Blob | null) => void) =
       };
 
       mediaRecorderRef.current.start(100);
+      console.log("Recording started");
       setIsRecording(true);
       toast({
         title: "Enregistrement",
