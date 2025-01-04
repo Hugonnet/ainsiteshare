@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Upload, Camera, X } from "lucide-react";
-import { Button } from "./ui/button";
 import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { PhotoButtons } from "./photo/PhotoButtons";
+import { PhotoPreview } from "./photo/PhotoPreview";
 
 interface PhotoUploadProps {
   onPhotosChange: (files: File[]) => void;
@@ -13,8 +12,6 @@ interface PhotoUploadProps {
 export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
-  const isMobile = useIsMobile();
-  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const [isPreparingCamera, setIsPreparingCamera] = useState(false);
 
   const updatePreviews = (files: File[]) => {
@@ -34,11 +31,9 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
     try {
       setIsPreparingCamera(true);
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: { exact: "environment" } 
-        } 
+        video: { facingMode: { exact: "environment" } } 
       });
-      setVideoStream(stream);
+      
       const video = document.createElement('video');
       video.srcObject = stream;
       video.style.position = 'fixed';
@@ -50,7 +45,6 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
       video.style.zIndex = '9999';
       document.body.appendChild(video);
       
-      // Ajouter un bouton pour prendre la photo
       const captureButton = document.createElement('button');
       captureButton.innerText = 'Prendre la photo';
       captureButton.style.position = 'fixed';
@@ -75,11 +69,9 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
             const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
             handleFiles([file]);
           }
-          // Nettoyer
           document.body.removeChild(video);
           document.body.removeChild(captureButton);
           stream.getTracks().forEach(track => track.stop());
-          setVideoStream(null);
           setIsPreparingCamera(false);
         }, 'image/jpeg');
       };
@@ -144,75 +136,32 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
       className="w-full max-w-xl mx-auto space-y-4"
     >
       <div
-        className={`glass rounded-lg p-8 text-center ${
-          isDragging ? "border-primary" : ""
-        }`}
+        className={`glass rounded-lg p-8 text-center ${isDragging ? "border-primary" : ""}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-        {!isMobile && (
-          <h3 className="text-xl font-semibold mb-2">
-            Déposez vos photos ici
-          </h3>
-        )}
-        <p className="text-muted-foreground mb-4">
-          ou
-        </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <input
-            id="file-upload"
-            type="file"
-            className="hidden"
-            multiple
-            accept="image/*"
-            onChange={handleFileChange}
-          />
-          <Button 
-            onClick={() => document.getElementById('file-upload')?.click()}
-            type="button"
-            className="file-upload-button"
-          >
-            <Upload className="mr-2" />
-            Choisir des photos
-          </Button>
-          {isMobile && (
-            <Button 
-              onClick={prepareCamera}
-              type="button"
-              variant="secondary"
-              disabled={isPreparingCamera}
-            >
-              <Camera className="mr-2" />
-              {isPreparingCamera ? "Préparation..." : "Prendre une photo"}
-            </Button>
-          )}
-        </div>
+        <input
+          id="file-upload"
+          type="file"
+          className="hidden"
+          multiple
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+        
+        <PhotoButtons 
+          onFileSelect={() => document.getElementById('file-upload')?.click()}
+          onCameraClick={prepareCamera}
+          isPreparingCamera={isPreparingCamera}
+        />
+
         <p className="text-sm text-muted-foreground mt-4">
           Maximum 10 photos au format PNG, JPG ou WEBP
         </p>
       </div>
 
-      {selectedFiles.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {previews.map((preview, index) => (
-            <div key={preview} className="relative aspect-square">
-              <img
-                src={preview}
-                alt={`Aperçu ${index + 1}`}
-                className="w-full h-full object-cover rounded-lg"
-              />
-              <button
-                onClick={() => removeFile(index)}
-                className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+      <PhotoPreview previews={previews} onRemove={removeFile} />
     </motion.div>
   );
 };

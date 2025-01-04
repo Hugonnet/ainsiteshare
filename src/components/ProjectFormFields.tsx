@@ -95,57 +95,55 @@ export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: Pro
           </FormItem>
         )}
       />
-      <div className="space-y-4">
-        <div className="flex items-end gap-4">
-          <div className="flex-1">
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-lg">Ville de la réalisation</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ville" className="text-lg" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="mb-2"
-            onClick={getLocation}
-            disabled={isLocating}
-          >
-            <MapPin className="mr-2 h-4 w-4" />
-            {isLocating ? "Localisation..." : "Me localiser"}
-          </Button>
-        </div>
-        <FormField
-          control={form.control}
-          name="department"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-lg">Département</FormLabel>
+
+      <FormField
+        control={form.control}
+        name="city"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-lg">Ville de la réalisation</FormLabel>
+            <div className="flex gap-2">
               <FormControl>
-                <Input placeholder="01" className="text-lg" maxLength={3} {...field} />
+                <Input placeholder="Ville concernée" className="text-lg" {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={getLocation}
+                disabled={isLocating}
+              >
+                <MapPin className="h-4 w-4 text-red-500" />
+                <span className="sr-only">Me localiser</span>
+              </Button>
+            </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="department"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-lg">Département concerné</FormLabel>
+            <FormControl>
+              <Input placeholder="Exemple : 01" className="text-lg" maxLength={3} {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <FormField
         control={form.control}
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-lg">Description de la réalisation</FormLabel>
+            <FormLabel className="text-lg">Type de prestation</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Décrivez votre réalisation..."
+                placeholder="Décrivez brièvement votre prestation en 1 phrase ..."
                 className="resize-none text-lg"
                 {...field}
               />
@@ -154,6 +152,7 @@ export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: Pro
           </FormItem>
         )}
       />
+
       <div className="flex justify-center">
         <PhotoUpload 
           selectedFiles={selectedFiles}
