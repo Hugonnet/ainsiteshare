@@ -70,7 +70,7 @@ serve(async (req) => {
     `).join('')
 
     const { error: emailError } = await resend.emails.send({
-      from: 'Ainsite <onboarding@resend.dev>',
+      from: 'Resend <onboarding@resend.dev>',
       to: ['ainsitenet@gmail.com'],
       subject: `Nouvelle réalisation de ${companyName} à ${city}`,
       html: `
