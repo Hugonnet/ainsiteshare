@@ -12,7 +12,7 @@ interface ProjectData {
   city: string;
   department: string;
   description: string;
-  photos: string[];
+  photoPaths: string[];
 }
 
 serve(async (req) => {
@@ -27,19 +27,27 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     )
 
-    const { data: projectData } = await req.json() as { data: ProjectData }
+    const { companyName, city, department, description, photoPaths } = await req.json()
     
-    const { companyName, city, department, description, photos } = projectData
+    // Get public URLs for the photos
+    const photoUrls = await Promise.all(
+      photoPaths.map(async (path) => {
+        const { data } = await supabaseClient.storage
+          .from('project_photos')
+          .getPublicUrl(path)
+        return data.publicUrl
+      })
+    )
 
-    const photosList = photos.map((photo, index) => `
+    const photosList = photoUrls.map((url, index) => `
       <div style="margin-bottom: 20px;">
-        <img src="${photo}" alt="Photo ${index + 1}" style="max-width: 100%; height: auto; border-radius: 8px;">
+        <img src="${url}" alt="Photo ${index + 1}" style="max-width: 100%; height: auto; border-radius: 8px;">
       </div>
     `).join('')
 
     const { error: emailError } = await resend.emails.send({
-      from: 'onboarding@resend.dev',
-      to: 'ainsitenet@gmail.com',
+      from: 'Ainsite <onboarding@resend.dev>',
+      to: ['onboarding@resend.dev'], // Temporarily using Resend's default email
       subject: `Nouvelle réalisation de ${companyName} à ${city}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -65,32 +73,17 @@ serve(async (req) => {
       throw new Error(`Failed to send email: ${JSON.stringify(emailError)}`)
     }
 
-    const { error: dbError } = await supabaseClient
-      .from('project_submissions')
-      .insert([
-        {
-          company_name: companyName,
-          city,
-          department,
-          description,
-          photo_paths: photos,
-        },
-      ])
-
-    if (dbError) {
-      throw new Error(`Database error: ${JSON.stringify(dbError)}`)
-    }
-
     return new Response(
-      JSON.stringify({ message: "Envoi en cours" }),
+      JSON.stringify({ message: "Email envoyé avec succès" }),
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       },
     )
   } catch (error) {
+    console.error('Error in send-project-email function:', error)
     return new Response(
-      JSON.stringify({ error: `Error in send-project-email function: ${error.message}` }),
+      JSON.stringify({ error: error.message }),
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
