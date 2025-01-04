@@ -61,7 +61,7 @@ export const CityField = ({ form }: CityFieldProps) => {
             <Button
               type="button"
               onClick={getLocation}
-              className="bg-[#39FF14] hover:bg-[#32E512] text-black font-semibold h-8 w-fit mx-auto"
+              className="gradient-button w-full text-white font-semibold h-10"
             >
               <MapPin className="h-4 w-4 mr-1" />
               Me localiser
