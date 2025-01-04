@@ -24,7 +24,7 @@ const Index = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 whitespace-nowrap">
+          <h1 className="text-2xl md:text-4xl font-bold mb-4 whitespace-nowrap">
             Partagez vos réalisations
           </h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
