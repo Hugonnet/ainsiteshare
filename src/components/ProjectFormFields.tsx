@@ -1,13 +1,10 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { PhotoUpload } from "./PhotoUpload";
-import { Button } from "./ui/button";
-import { MapPin } from "lucide-react";
-import { toast } from "sonner";
-import { useState } from "react";
+import { CompanyNameField } from "./form-fields/CompanyNameField";
+import { CityField } from "./form-fields/CityField";
+import { DepartmentField } from "./form-fields/DepartmentField";
+import { DescriptionField } from "./form-fields/DescriptionField";
 
 export const formSchema = z.object({
   companyName: z.string().min(2, {
@@ -35,124 +32,12 @@ interface ProjectFormFieldsProps {
 }
 
 export const ProjectFormFields = ({ form, selectedFiles, setSelectedFiles }: ProjectFormFieldsProps) => {
-  const [isLocating, setIsLocating] = useState(false);
-
-  const getLocation = () => {
-    setIsLocating(true);
-    if (!navigator.geolocation) {
-      toast.error("La géolocalisation n'est pas supportée par votre navigateur");
-      setIsLocating(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const response = await fetch(
-            `https://api-adresse.data.gouv.fr/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`
-          );
-          const data = await response.json();
-          
-          if (data.features && data.features.length > 0) {
-            const properties = data.features[0].properties;
-            const city = properties.city;
-            const postcode = properties.postcode;
-            const department = postcode.substring(0, 2);
-            
-            form.setValue("city", city);
-            form.setValue("department", department);
-            toast.success("Localisation réussie !");
-          } else {
-            toast.error("Impossible de déterminer votre localisation");
-          }
-        } catch (error) {
-          console.error("Erreur lors de la géolocalisation:", error);
-          toast.error("Erreur lors de la récupération de la localisation");
-        } finally {
-          setIsLocating(false);
-        }
-      },
-      (error) => {
-        console.error("Erreur de géolocalisation:", error);
-        toast.error("Erreur lors de la géolocalisation");
-        setIsLocating(false);
-      }
-    );
-  };
-
   return (
     <>
-      <FormField
-        control={form.control}
-        name="companyName"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-lg">Nom de l'entreprise</FormLabel>
-            <FormControl>
-              <Input placeholder="Votre entreprise" className="text-lg" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="city"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-lg whitespace-nowrap">Ville de la réalisation</FormLabel>
-            <div className="relative">
-              <FormControl>
-                <Input placeholder="Ville concernée" className="text-lg pr-32" {...field} />
-              </FormControl>
-              <Button
-                type="button"
-                onClick={getLocation}
-                disabled={isLocating}
-                className="absolute right-1 top-1/2 -translate-y-1/2 bg-[#39FF14] hover:bg-[#32E512] text-black font-semibold h-8 px-3"
-              >
-                <MapPin className="h-4 w-4 mr-1" />
-                Localiser
-              </Button>
-            </div>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="department"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-lg">Département concerné</FormLabel>
-            <FormControl>
-              <Input placeholder="Exemple : 01" className="text-lg" maxLength={3} {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-lg">Type de prestation</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Décrivez brièvement votre prestation en 1 phrase ..."
-                className="resize-none text-lg"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
+      <CompanyNameField form={form} />
+      <CityField form={form} />
+      <DepartmentField form={form} />
+      <DescriptionField form={form} />
       <div className="flex justify-center">
         <PhotoUpload 
           selectedFiles={selectedFiles}
