@@ -59,6 +59,8 @@ export type Database = {
       }
       seo_analyses: {
         Row: {
+          archived: boolean | null
+          company: string | null
           created_at: string | null
           current_description: string | null
           current_h1: string | null
@@ -66,6 +68,11 @@ export type Database = {
           current_h3s: string[] | null
           current_h4s: string[] | null
           current_title: string | null
+          description_context: string | null
+          h1_context: string | null
+          h2s_context: string[] | null
+          h3s_context: string[] | null
+          h4s_context: string[] | null
           id: number
           suggested_description: string | null
           suggested_h1: string | null
@@ -73,10 +80,13 @@ export type Database = {
           suggested_h3s: string[] | null
           suggested_h4s: string[] | null
           suggested_title: string | null
+          title_context: string | null
           url: string
           visible_text: string[] | null
         }
         Insert: {
+          archived?: boolean | null
+          company?: string | null
           created_at?: string | null
           current_description?: string | null
           current_h1?: string | null
@@ -84,6 +94,11 @@ export type Database = {
           current_h3s?: string[] | null
           current_h4s?: string[] | null
           current_title?: string | null
+          description_context?: string | null
+          h1_context?: string | null
+          h2s_context?: string[] | null
+          h3s_context?: string[] | null
+          h4s_context?: string[] | null
           id?: number
           suggested_description?: string | null
           suggested_h1?: string | null
@@ -91,10 +106,13 @@ export type Database = {
           suggested_h3s?: string[] | null
           suggested_h4s?: string[] | null
           suggested_title?: string | null
+          title_context?: string | null
           url: string
           visible_text?: string[] | null
         }
         Update: {
+          archived?: boolean | null
+          company?: string | null
           created_at?: string | null
           current_description?: string | null
           current_h1?: string | null
@@ -102,6 +120,11 @@ export type Database = {
           current_h3s?: string[] | null
           current_h4s?: string[] | null
           current_title?: string | null
+          description_context?: string | null
+          h1_context?: string | null
+          h2s_context?: string[] | null
+          h3s_context?: string[] | null
+          h4s_context?: string[] | null
           id?: number
           suggested_description?: string | null
           suggested_h1?: string | null
@@ -109,6 +132,7 @@ export type Database = {
           suggested_h3s?: string[] | null
           suggested_h4s?: string[] | null
           suggested_title?: string | null
+          title_context?: string | null
           url?: string
           visible_text?: string[] | null
         }

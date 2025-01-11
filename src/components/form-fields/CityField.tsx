@@ -55,21 +55,21 @@ export const CityField = ({ form }: CityFieldProps) => {
       control={form.control}
       name="city"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="space-y-3 md:space-y-4">
           <FormLabel className="text-lg whitespace-nowrap">Ville de la réalisation</FormLabel>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <Button
               type="button"
               onClick={getLocation}
-              className="gradient-button w-full text-white font-semibold h-10"
+              className="gradient-button w-full text-white font-medium text-sm h-10"
             >
               <MapPin className="h-4 w-4 mr-1" />
               Me localiser
             </Button>
             <FormControl>
               <Input 
-                placeholder="Ville concernée" 
-                className="text-lg placeholder:text-muted-foreground/50" 
+                placeholder='Cliquez sur "Me localiser" ou entrez la ville concernée'
+                className="text-sm placeholder:text-muted-foreground/50" 
                 {...field} 
               />
             </FormControl>
