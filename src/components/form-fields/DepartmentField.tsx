@@ -19,7 +19,7 @@ export const DepartmentField = ({ form }: DepartmentFieldProps) => {
           <FormControl>
             <Input 
               placeholder="Exemple : 01" 
-              className="text-lg placeholder:text-muted-foreground/50" 
+              className="text-sm placeholder:text-muted-foreground/50 h-[48px]" 
               maxLength={3} 
               {...field} 
             />

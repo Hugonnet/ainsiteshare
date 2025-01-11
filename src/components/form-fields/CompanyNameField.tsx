@@ -19,7 +19,7 @@ export const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
           <FormControl>
             <Input 
               placeholder="Votre entreprise" 
-              className="text-lg placeholder:text-muted-foreground/50" 
+              className="text-sm placeholder:text-muted-foreground/50 h-[48px]" 
               {...field} 
             />
           </FormControl>
