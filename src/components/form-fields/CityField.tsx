@@ -42,19 +42,19 @@ export const CityField = ({ form }: CityFieldProps) => {
       render={({ field }) => (
         <FormItem className="space-y-1">
           <div className="flex flex-col space-y-1">
-            <FormLabel>Ville</FormLabel>
+            <FormLabel className="text-lg">Ville</FormLabel>
             <Button
               type="button"
               onClick={handleLocation}
-              className="gradient-button text-white font-semibold h-[48px] w-full md:w-auto"
+              className="gradient-button text-white font-medium text-base h-[48px] w-full md:w-auto"
             >
               <MapPin className="h-4 w-4" />
               Me localiser
             </Button>
             <FormControl>
               <Input
-                placeholder={`Cliquez sur "Me localiser" ou entrez\nle nom de la ville concernée`}
-                className="text-sm placeholder:text-muted-foreground/50 h-[48px] whitespace-pre-line"
+                placeholder="Cliquez sur 'Me localiser' ou entrez le nom de la ville concernée"
+                className="text-base placeholder:text-muted-foreground/50 h-[48px] whitespace-pre-line"
                 {...field}
               />
             </FormControl>
