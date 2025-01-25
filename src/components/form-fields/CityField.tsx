@@ -1,18 +1,16 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
-import * as z from "zod";
-import { formSchema } from "../ProjectFormFields";
 
 interface CityFieldProps {
-  form: UseFormReturn<z.infer<typeof formSchema>>;
+  form: UseFormReturn<any>;
 }
 
 export const CityField = ({ form }: CityFieldProps) => {
-  const getLocation = () => {
+  const handleLocation = () => {
     if (!navigator.geolocation) {
       toast.error("La géolocalisation n'est pas supportée par votre navigateur");
       return;
@@ -22,30 +20,17 @@ export const CityField = ({ form }: CityFieldProps) => {
       async (position) => {
         try {
           const response = await fetch(
-            `https://api-adresse.data.gouv.fr/reverse/?lon=${position.coords.longitude}&lat=${position.coords.latitude}`
+            `https://api-adresse.data.gouv.fr/reverse/?lat=${position.coords.latitude}&lon=${position.coords.longitude}`
           );
           const data = await response.json();
-          
-          if (data.features && data.features.length > 0) {
-            const properties = data.features[0].properties;
-            const city = properties.city;
-            const postcode = properties.postcode;
-            const department = postcode.substring(0, 2);
-            
-            form.setValue("city", city);
-            form.setValue("department", department);
-            toast.success("Localisation réussie !");
-          } else {
-            toast.error("Impossible de déterminer votre localisation");
-          }
+          const city = data.features[0].properties.city;
+          form.setValue("city", city);
         } catch (error) {
-          console.error("Erreur lors de la géolocalisation:", error);
-          toast.error("Erreur lors de la récupération de la localisation");
+          toast.error("Erreur lors de la récupération de la ville");
         }
       },
-      (error) => {
-        console.error("Erreur de géolocalisation:", error);
-        toast.error("Erreur lors de la géolocalisation");
+      () => {
+        toast.error("Impossible de récupérer votre position");
       }
     );
   };
@@ -55,24 +40,24 @@ export const CityField = ({ form }: CityFieldProps) => {
       control={form.control}
       name="city"
       render={({ field }) => (
-        <FormItem className="space-y-3 md:space-y-4">
-          <FormLabel className="text-lg whitespace-nowrap">Ville de la réalisation</FormLabel>
-          <div className="flex flex-col gap-3">
-            <Button
-              type="button"
-              onClick={getLocation}
-              className="gradient-button w-full text-white font-medium text-sm h-10"
-            >
-              <MapPin className="h-4 w-4 mr-1" />
-              Me localiser
-            </Button>
+        <FormItem className="space-y-1">
+          <FormLabel>Ville</FormLabel>
+          <div className="flex gap-3">
             <FormControl>
-              <Input 
-                placeholder={'Cliquez sur "Me localiser" ou entrez\nle nom de la ville concernée'}
-                className="text-sm placeholder:text-muted-foreground/50 whitespace-pre-line h-[60px]" 
-                {...field} 
+              <Input
+                placeholder={`Cliquez sur "Me localiser" ou entrez\nle nom de la ville concernée`}
+                className="text-sm placeholder:text-muted-foreground/50 h-[48px] whitespace-pre-line"
+                {...field}
               />
             </FormControl>
+            <Button
+              type="button"
+              onClick={handleLocation}
+              className="gradient-button text-white font-semibold h-[48px] px-4 whitespace-nowrap"
+            >
+              <MapPin className="h-4 w-4" />
+              Me localiser
+            </Button>
           </div>
           <FormMessage />
         </FormItem>
