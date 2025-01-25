@@ -22,7 +22,7 @@ export const AudioButton = ({
         onClick={onStopRecording}
         variant="destructive"
         type="button"
-        className="h-[48px]"
+        className="h-[48px] w-full md:w-auto"
       >
         <Square className="h-4 w-4" />
         Arrêter
@@ -36,7 +36,7 @@ export const AudioButton = ({
         onClick={onDeleteRecording}
         variant="outline"
         type="button"
-        className="h-[48px]"
+        className="h-[48px] w-full md:w-auto"
       >
         <Trash2 className="h-4 w-4" />
         Supprimer
@@ -48,7 +48,7 @@ export const AudioButton = ({
     <Button
       onClick={onStartRecording}
       type="button"
-      className="gradient-button text-white font-semibold h-[48px]"
+      className="gradient-button text-white font-semibold h-[48px] w-full md:w-auto"
     >
       <Mic className="h-4 w-4" />
       Enregistrer un message vocal

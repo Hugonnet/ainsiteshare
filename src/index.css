@@ -71,7 +71,7 @@
 }
 
 .gradient-button {
-  background: linear-gradient(90deg, #FF0080 0%, #7928CA 50%, #2563EB 100%);
+  @apply bg-red-600 hover:bg-red-700;
   transition: all 0.3s ease;
 }
 
