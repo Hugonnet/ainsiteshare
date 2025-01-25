@@ -115,7 +115,7 @@ export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
           <button 
             type="submit" 
             disabled={isUploading} 
-            className="gradient-button text-white font-semibold text-lg px-8 py-4 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="submit-button text-white font-semibold text-lg px-8 py-4 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isUploading ? "Envoi en cours..." : "Soumettre le projet"}
           </button>
