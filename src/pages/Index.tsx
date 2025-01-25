@@ -3,7 +3,7 @@ import { ProjectForm } from "@/components/ProjectForm";
 import { Fireworks } from "@/components/Fireworks";
 import { SuccessMessage } from "@/components/SuccessMessage";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
@@ -15,18 +15,17 @@ const Index = () => {
     setSubmissionData({ company, city });
     setSubmitted(true);
     
-    // Redirection après 5 secondes
     setTimeout(() => {
       setSubmitted(false);
       setSubmissionData(null);
-      navigate(0); // Recharge la page pour réinitialiser le formulaire
+      navigate(0);
     }, 5000);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container pt-24 pb-16">
+      <main className="container max-w-xl mx-auto pt-24 pb-16 px-4">
         {!submitted ? (
           <>
             <motion.div
@@ -38,7 +37,7 @@ const Index = () => {
               <h1 className="text-2xl md:text-4xl font-bold mb-4 whitespace-nowrap">
                 Partagez vos réalisations
               </h1>
-              <p className="text-muted-foreground max-w-xl mx-auto">
+              <p className="text-muted-foreground">
                 Téléchargez et partagez facilement les photos de vos chantiers
               </p>
             </motion.div>
