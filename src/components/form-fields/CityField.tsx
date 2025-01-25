@@ -53,7 +53,7 @@ export const CityField = ({ form }: CityFieldProps) => {
             </Button>
             <FormControl>
               <Input
-                placeholder="Cliquez sur 'Me localiser' ou entrez le nom de la ville concernée"
+                placeholder={`Cliquez sur "Me localiser" ou\nentrez le nom de la ville concernée`}
                 className="text-base placeholder:text-muted-foreground/50 h-[48px] whitespace-pre-line"
                 {...field}
               />
