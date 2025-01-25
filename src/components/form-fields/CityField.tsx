@@ -46,14 +46,14 @@ export const CityField = ({ form }: CityFieldProps) => {
             <Button
               type="button"
               onClick={handleLocation}
-              className="gradient-button text-white font-medium text-base h-[48px] w-full md:w-auto"
+              className="gradient-button text-white font-medium text-base h-[48px] w-full max-w-[400px] mx-auto"
             >
               <MapPin className="h-4 w-4" />
               Me localiser
             </Button>
             <FormControl>
               <Input
-                placeholder={`Cliquez sur "Me localiser" ou\nentrez le nom de la ville concernée`}
+                placeholder="Cliquez sur 'Me localiser' ou\nentrez le nom de la ville concernée"
                 className="text-base placeholder:text-muted-foreground/50 h-[48px] whitespace-pre-line"
                 {...field}
               />
