@@ -49,7 +49,7 @@ export const CityField = ({ form }: CityFieldProps) => {
               className="gradient-button text-white font-medium text-base h-[48px] w-full max-w-[400px] mx-auto"
             >
               <MapPin className="h-4 w-4" />
-              Me localiser
+              Géolocalisation automatique 
             </Button>
             <FormControl>
               <Input
