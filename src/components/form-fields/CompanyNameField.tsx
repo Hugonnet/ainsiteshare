@@ -15,7 +15,7 @@ export const CompanyNameField = ({ form }: CompanyNameFieldProps) => {
       name="companyName"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="text-lg">Nom de l'entreprise</FormLabel>
+          <FormLabel className="text-lg">Nom de votre entreprise</FormLabel>
           <FormControl>
             <Input 
               placeholder="Votre entreprise" 

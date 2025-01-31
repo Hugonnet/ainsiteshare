@@ -42,7 +42,7 @@ export const CityField = ({ form }: CityFieldProps) => {
       render={({ field }) => (
         <FormItem className="space-y-1">
           <div className="flex flex-col space-y-1">
-            <FormLabel className="text-lg">Géolocalisation chantier</FormLabel>
+            <FormLabel className="text-lg">Géolocalisation de votre chantier</FormLabel>
             <Button
               type="button"
               onClick={handleLocation}
