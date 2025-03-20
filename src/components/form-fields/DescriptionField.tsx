@@ -6,6 +6,7 @@ import * as z from "zod";
 import { formSchema } from "../ProjectFormFields";
 import { useEffect } from "react";
 import { AudioRecorder } from "../AudioRecorder";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DescriptionFieldProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
@@ -16,6 +17,8 @@ interface DescriptionFieldProps {
 const STORAGE_KEY = 'saved_description';
 
 export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionFieldProps) => {
+  const isMobile = useIsMobile();
+  
   useEffect(() => {
     const savedDescription = localStorage.getItem(STORAGE_KEY);
     if (savedDescription) {
@@ -42,7 +45,7 @@ export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionF
           <FormControl>
             <Textarea
               placeholder={audioBlob ? "" : "Ou bien décrivez votre prestation (Ex : Isolation murs intérieurs villa à Brion ou Ravalement façades crépi rustique à Nantua)"}
-              className="resize-none text-sm placeholder:text-gray-400 min-h-[48px]"
+              className={`resize-none text-sm placeholder:text-gray-400 ${isMobile ? 'min-h-[100px]' : 'min-h-[48px]'}`}
               {...field}
             />
           </FormControl>
