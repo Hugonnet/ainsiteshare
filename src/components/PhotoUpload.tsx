@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { PhotoButtons } from "./photo/PhotoButtons";
 import { PhotoPreview } from "./photo/PhotoPreview";
+import { resizeImage } from "@/utils/imageResizer";
 
 interface PhotoUploadProps {
   onPhotosChange: (files: File[]) => void;
@@ -22,9 +24,9 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
     });
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    handleFiles(files);
+    await handleFiles(files);
   };
 
   const prepareCamera = async () => {
@@ -58,16 +60,18 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
       captureButton.style.borderRadius = '8px';
       captureButton.style.border = 'none';
       
-      captureButton.onclick = () => {
+      captureButton.onclick = async () => {
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d')?.drawImage(video, 0, 0);
         
-        canvas.toBlob((blob) => {
+        canvas.toBlob(async (blob) => {
           if (blob) {
             const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
-            handleFiles([file]);
+            const resizedBlob = await resizeImage(file);
+            const resizedFile = new File([resizedBlob], file.name, { type: file.type });
+            await handleFiles([resizedFile]);
           }
           document.body.removeChild(video);
           document.body.removeChild(captureButton);
@@ -86,13 +90,14 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
     }
   };
 
-  const handleFiles = (files: File[]) => {
+  const handleFiles = async (files: File[]) => {
     const totalFiles = selectedFiles.length + files.length;
     if (totalFiles > 10) {
       toast.error("Vous ne pouvez pas télécharger plus de 10 photos");
       return;
     }
 
+    // Filter valid files
     const validFiles = files.filter(file => {
       const isValid = file.type.startsWith('image/');
       if (!isValid) {
@@ -101,7 +106,21 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
       return isValid;
     });
 
-    const newFiles = [...selectedFiles, ...validFiles];
+    // Resize each image before adding to selected files
+    const resizedFiles: File[] = [];
+    for (const file of validFiles) {
+      try {
+        const resizedBlob = await resizeImage(file);
+        // Create a new File from the resized Blob, using the original file's name and type
+        const resizedFile = new File([resizedBlob], file.name, { type: file.type });
+        resizedFiles.push(resizedFile);
+      } catch (error) {
+        console.error(`Error resizing image ${file.name}:`, error);
+        resizedFiles.push(file); // Fallback to original file if resizing fails
+      }
+    }
+
+    const newFiles = [...selectedFiles, ...resizedFiles];
     onPhotosChange(newFiles);
     updatePreviews(newFiles);
   };
@@ -115,11 +134,11 @@ export const PhotoUpload = ({ onPhotosChange, selectedFiles }: PhotoUploadProps)
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
+    await handleFiles(files);
   };
 
   const removeFile = (index: number) => {
