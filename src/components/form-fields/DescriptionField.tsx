@@ -41,7 +41,7 @@ export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionF
           />
           <FormControl>
             <Textarea
-              placeholder={audioBlob ? "" : "Ou bien décrivez votre prestation (ex: Isolation murs intérieurs villa à Brion)"}
+              placeholder={audioBlob ? "" : "Ou bien décrivez votre prestation (Ex : Isolation murs intérieurs villa à Brion ou Ravalement façades crépi rustique à Nantua)"}
               className="resize-none text-sm placeholder:text-gray-400 min-h-[48px]"
               {...field}
             />
