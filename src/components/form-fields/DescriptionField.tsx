@@ -1,3 +1,4 @@
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
@@ -41,7 +42,7 @@ export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionF
           <FormControl>
             <Textarea
               placeholder={audioBlob ? "" : "Ou bien décrivez votre prestation en 1 phrase ..."}
-              className="resize-none text-sm placeholder:text-muted-foreground/50 min-h-[48px]"
+              className="resize-none text-sm placeholder:text-gray-400 min-h-[48px]"
               {...field}
             />
           </FormControl>

@@ -1,3 +1,4 @@
+
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,7 @@ export const CityField = ({ form }: CityFieldProps) => {
       render={({ field }) => (
         <FormItem className="space-y-1">
           <div className="flex flex-col space-y-1">
-            <FormLabel className="text-lg">Géolocalisation de votre chantier</FormLabel>
+            <FormLabel className="text-lg">Géolocalisation chantier</FormLabel>
             <Button
               type="button"
               onClick={handleLocation}
@@ -53,8 +54,8 @@ export const CityField = ({ form }: CityFieldProps) => {
             </Button>
             <FormControl>
               <Input
-                placeholder="Ou entrez le nom de la ville concernée"
-                className="text-sm placeholder:text-muted-foreground/50 h-[48px] min-h-[64px] whitespace-pre-wrap break-words resize-none"
+                placeholder="Ou entrez le nom de la ville"
+                className="text-sm placeholder:text-gray-400 h-[48px] min-h-[64px] whitespace-pre-wrap break-words resize-none"
                 {...field}
               />
             </FormControl>

@@ -1,3 +1,4 @@
+
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
@@ -19,7 +20,7 @@ export const DepartmentField = ({ form }: DepartmentFieldProps) => {
           <FormControl>
             <Input 
               placeholder="Exemple : 01" 
-              className="text-sm placeholder:text-muted-foreground/50 h-[48px]" 
+              className="text-sm placeholder:text-gray-400 h-[48px]" 
               maxLength={3} 
               {...field} 
             />

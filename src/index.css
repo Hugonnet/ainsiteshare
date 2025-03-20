@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -88,4 +89,10 @@
 .submit-button:hover {
   opacity: 0.9;
   transform: translateY(-1px);
+}
+
+/* Styles spécifiques pour les placeholders */
+::placeholder {
+  color: #C8C8C9 !important;
+  opacity: 1;
 }
