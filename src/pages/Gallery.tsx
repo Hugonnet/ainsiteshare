@@ -52,8 +52,8 @@ const Gallery = () => {
           company_name: item.company_name,
           city: item.city,
           department: item.department,
-          // Set a default value for project_type since it might not exist in the response
-          project_type: "project_type" in item ? item.project_type : "neuf",
+          // Explicitly cast project_type to string and ensure it has a default value
+          project_type: item.project_type ? String(item.project_type) : "neuf",
           description: item.description,
           photo_paths: item.photo_paths,
           audio_path: item.audio_path,
