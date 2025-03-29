@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProjectFormFields, formSchema } from "./ProjectFormFields";
 import type { z } from "zod";
 
@@ -12,21 +12,52 @@ interface ProjectFormProps {
   onSubmissionSuccess: (company: string, city: string) => void;
 }
 
+// Clé pour le stockage local
+const FORM_STORAGE_KEY = 'savedProjectForm';
+
 export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
+  // Récupération des données sauvegardées au démarrage
+  const getSavedFormData = () => {
+    const savedData = localStorage.getItem(FORM_STORAGE_KEY);
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        // On ne peut pas stocker les fichiers dans localStorage, donc on les réinitialise
+        return parsedData;
+      } catch (e) {
+        console.error("Erreur lors de la récupération des données sauvegardées:", e);
+        localStorage.removeItem(FORM_STORAGE_KEY);
+      }
+    }
+    
+    return {
       companyName: "",
       city: "",
       department: "",
       projectType: "neuf",
       description: "",
-    },
+    };
+  };
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: getSavedFormData(),
   });
+
+  // Sauvegarde automatique lorsque le formulaire change
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (Object.values(value).some(v => v)) { // Si au moins un champ a une valeur
+        localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(value));
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (selectedFiles.length === 0) {
@@ -92,6 +123,9 @@ export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
         console.error('Error sending email:', emailError);
       }
 
+      // Effacer les données sauvegardées après soumission réussie
+      localStorage.removeItem(FORM_STORAGE_KEY);
+      
       toast.success("Projet soumis avec succès !");
       onSubmissionSuccess(values.companyName, values.city);
       form.reset();

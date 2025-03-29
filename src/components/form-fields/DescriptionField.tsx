@@ -14,18 +14,9 @@ interface DescriptionFieldProps {
   setAudioBlob: (blob: Blob | null) => void;
 }
 
-const STORAGE_KEY = 'saved_description';
-
 export const DescriptionField = ({ form, audioBlob, setAudioBlob }: DescriptionFieldProps) => {
   const isMobile = useIsMobile();
   
-  useEffect(() => {
-    const savedDescription = localStorage.getItem(STORAGE_KEY);
-    if (savedDescription) {
-      form.setValue('description', savedDescription);
-    }
-  }, [form]);
-
   return (
     <FormField
       control={form.control}
