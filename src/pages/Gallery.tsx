@@ -52,7 +52,8 @@ const Gallery = () => {
           company_name: item.company_name,
           city: item.city,
           department: item.department,
-          project_type: item.project_type || "neuf", // Provide a default value
+          // Set a default value for project_type since it might not exist in the response
+          project_type: "project_type" in item ? item.project_type : "neuf",
           description: item.description,
           photo_paths: item.photo_paths,
           audio_path: item.audio_path,
