@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
@@ -7,6 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { ProjectFormFields, formSchema } from "./ProjectFormFields";
 import type { z } from "zod";
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
+import { GalleryHorizontal } from "lucide-react";
 
 interface ProjectFormProps {
   onSubmissionSuccess: (company: string, city: string) => void;
@@ -139,6 +141,10 @@ export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
     }
   };
 
+  // Récupère la valeur actuelle du nom de l'entreprise
+  const companyName = form.watch("companyName");
+  const hasCompanyName = companyName.length >= 2;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -149,7 +155,7 @@ export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
           audioBlob={audioBlob}
           setAudioBlob={setAudioBlob}
         />
-        <div className="flex justify-center">
+        <div className="flex flex-col md:flex-row justify-center items-center gap-4">
           <button 
             type="submit" 
             disabled={isUploading} 
@@ -157,6 +163,22 @@ export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
           >
             {isUploading ? "Envoi en cours..." : "Soumettre le projet"}
           </button>
+          
+          {hasCompanyName && (
+            <Link
+              to={`/gallery?company=${encodeURIComponent(companyName)}`}
+              className="flex items-center"
+            >
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="flex items-center gap-2 py-4 px-6"
+              >
+                <GalleryHorizontal size={20} />
+                <span>Voir vos projets</span>
+              </Button>
+            </Link>
+          )}
         </div>
       </form>
     </Form>
