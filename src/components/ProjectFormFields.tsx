@@ -1,3 +1,4 @@
+
 import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { PhotoUpload } from "./PhotoUpload";
@@ -5,6 +6,7 @@ import { CompanyNameField } from "./form-fields/CompanyNameField";
 import { CityField } from "./form-fields/CityField";
 import { DepartmentField } from "./form-fields/DepartmentField";
 import { DescriptionField } from "./form-fields/DescriptionField";
+import { ProjectTypeField } from "./form-fields/ProjectTypeField";
 
 export const formSchema = z.object({
   companyName: z.string().min(2, {
@@ -17,6 +19,9 @@ export const formSchema = z.object({
     message: "Le département est requis.",
   }).max(3, {
     message: "Le numéro de département ne peut pas dépasser 3 caractères.",
+  }),
+  projectType: z.enum(["neuf", "renovation"], {
+    message: "Veuillez sélectionner un type de projet.",
   }),
   description: z.string().min(10, {
     message: "La description doit contenir au moins 10 caractères.",
@@ -45,6 +50,7 @@ export const ProjectFormFields = ({
       <CompanyNameField form={form} />
       <CityField form={form} />
       <DepartmentField form={form} />
+      <ProjectTypeField form={form} />
       <DescriptionField 
         form={form} 
         audioBlob={audioBlob}

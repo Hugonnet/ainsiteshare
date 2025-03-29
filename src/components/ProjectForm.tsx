@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
@@ -22,6 +23,7 @@ export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
       companyName: "",
       city: "",
       department: "",
+      projectType: "neuf",
       description: "",
     },
   });
@@ -66,6 +68,7 @@ export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
           company_name: values.companyName,
           city: values.city,
           department: values.department,
+          project_type: values.projectType,
           description: values.description,
           photo_paths: photoPaths,
           audio_path: audioPath,
@@ -78,6 +81,7 @@ export function ProjectForm({ onSubmissionSuccess }: ProjectFormProps) {
           companyName: values.companyName,
           city: values.city,
           department: values.department,
+          projectType: values.projectType,
           description: values.description,
           photoPaths,
           audioPath,
