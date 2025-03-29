@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Gallery as GalleryIcon, HomeIcon, Image } from "lucide-react";
+import { HomeIcon, Image, LayoutGrid } from "lucide-react";
 
 interface ProjectSubmission {
   id: number;
@@ -45,7 +45,21 @@ const Gallery = () => {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        setProjects(data || []);
+        
+        // Transform the data to match our ProjectSubmission interface
+        const transformedData: ProjectSubmission[] = (data || []).map(item => ({
+          id: item.id,
+          company_name: item.company_name,
+          city: item.city,
+          department: item.department,
+          project_type: item.project_type || "neuf", // Provide a default value
+          description: item.description,
+          photo_paths: item.photo_paths,
+          audio_path: item.audio_path,
+          created_at: item.created_at
+        }));
+        
+        setProjects(transformedData);
       } catch (err) {
         console.error("Erreur lors de la récupération des projets:", err);
         setError("Impossible de charger les projets");
@@ -87,7 +101,7 @@ const Gallery = () => {
           </div>
         ) : error ? (
           <div className="text-center py-12">
-            <GalleryIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <LayoutGrid className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">Aucun projet trouvé</h2>
             <p className="text-muted-foreground mb-6">{error}</p>
             <Link to="/">
@@ -96,7 +110,7 @@ const Gallery = () => {
           </div>
         ) : projects.length === 0 ? (
           <div className="text-center py-12">
-            <GalleryIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <LayoutGrid className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">Aucun projet trouvé</h2>
             <p className="text-muted-foreground mb-6">
               Cette entreprise n'a pas encore partagé de projets.
